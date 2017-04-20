@@ -1,0 +1,129 @@
+[
+    {
+        "id": 1,
+        "chapter": "正方一辩发言",
+        "time": 180,
+        "timer": 1,
+        "timer_name": [
+            "剩余时间"
+        ]
+    },
+    {
+        "id": 2,
+        "chapter": "反方四辩盘问正方一辩",
+        "time": 90,
+        "timer": 1,
+        "timer_name": [
+            "剩余时间"
+        ]
+    },
+    {
+        "id": 3,
+        "chapter": "反方一辩发言",
+        "time": 180,
+        "timer": 1,
+        "timer_name": [
+            "剩余时间"
+        ]
+    },
+    {
+        "id": 4,
+        "chapter": "正方四辩盘问反方一辩",
+        "time": 90,
+        "timer": 1,
+        "timer_name": [
+            "剩余时间"
+        ]
+    },
+    {
+        "id": 5,
+        "chapter": "正方二辩针对对方立论作驳论",
+        "time": 120,
+        "timer": 1,
+        "timer_name": [
+            "剩余时间"
+        ]
+    },
+    {
+        "id": 6,
+        "chapter": "反方二辩针对对方立论作驳论",
+        "time": 120,
+        "timer": 1,
+        "timer_name": [
+            "剩余时间"
+        ]
+    },
+    {
+        "id": 7,
+        "chapter": "正方二辩对辩反方二辩",
+        "time": 90,
+        "timer": 1,
+        "timer_name": [
+            "剩余时间"
+        ]
+    },
+    {
+        "id": 8,
+        "chapter": "正方三辩盘问",
+        "time": 120,
+        "timer": 1,
+        "timer_name": [
+            "剩余时间"
+        ]
+    },
+    {
+        "id": 9,
+        "chapter": "反方三辩盘问",
+        "time": 120,
+        "timer": 1,
+        "timer_name": [
+            "剩余时间"
+        ]
+    },
+    {
+        "id": 10,
+        "chapter": "正方三辩小结",
+        "time": 90,
+        "timer": 1,
+        "timer_name": [
+            "剩余时间"
+        ]
+    },
+    {
+        "id": 11,
+        "chapter": "反方三辩小结",
+        "time": 90,
+        "timer": 1,
+        "timer_name": [
+            "剩余时间"
+        ]
+    },
+    {
+        "id": 12,
+        "chapter": "自由辩论",
+        "time": 480,
+        "timer": 2,
+        "timer_name": [
+            "正方剩余时间",
+            "反方剩余时间"            
+        ]        
+    },
+    {
+        "id": 13,
+        "chapter": "反方四辩总结陈词",
+        "time": 180,
+        "timer": 1,
+        "timer_name": [
+            "剩余时间"
+        ]
+    },
+    {
+        "id": 14,
+        "chapter": "正方四辩总结陈词",
+        "time": 180,
+        "timer": 1,
+        "timer_name": [
+            "剩余时间"
+        ]
+    }
+]

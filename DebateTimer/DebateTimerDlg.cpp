@@ -6,6 +6,9 @@
 #include "DebateTimer.h"
 #include "DebateTimerDlg.h"
 #include "afxdialogex.h"
+#include "AboutDlg.h"
+#include "SettingDlg.h"
+#include "StartDebate.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -30,6 +33,9 @@ void CDebateTimerDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CDebateTimerDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+	ON_BN_CLICKED(IDC_BTN_ABOUT, &CDebateTimerDlg::OnBnClickedBtnAbout)
+	ON_BN_CLICKED(IDC_BTN_SETRULE, &CDebateTimerDlg::OnBnClickedBtnSetrule)
+	ON_BN_CLICKED(IDC_BUTTON2, &CDebateTimerDlg::OnBnClickedButton2)
 END_MESSAGE_MAP()
 
 
@@ -85,3 +91,32 @@ HCURSOR CDebateTimerDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+
+// 关于按钮
+void CDebateTimerDlg::OnBnClickedBtnAbout()
+{
+	CAboutDlg dlg;
+	dlg.DoModal();
+}
+
+// 设置规则按钮
+void CDebateTimerDlg::OnBnClickedBtnSetrule()
+{
+	CSettingDlg dlg;
+	dlg.DoModal();
+}
+
+// 开始辩论按钮
+void CDebateTimerDlg::OnBnClickedButton2()
+{
+	CStartDebate dlg;
+	dlg.DoModal();
+}
+
+
+BOOL CDebateTimerDlg::PreTranslateMessage(MSG* pMsg)
+{
+	if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_ESCAPE)
+		return TRUE;
+	return CDialogEx::PreTranslateMessage(pMsg);
+}

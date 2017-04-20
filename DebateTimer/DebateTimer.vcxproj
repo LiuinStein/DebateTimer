@@ -22,7 +22,7 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{C17D4471-11CC-490D-8A1A-8998FA38BB33}</ProjectGuid>
     <RootNamespace>DebateTimer</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.10586.0</WindowsTargetPlatformVersion>
     <Keyword>MFCProj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -186,15 +186,25 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AboutDlg.h" />
+    <ClInclude Include="Core.h" />
+    <ClInclude Include="DataStruct.h" />
     <ClInclude Include="DebateTimer.h" />
     <ClInclude Include="DebateTimerDlg.h" />
+    <ClInclude Include="ParseJson.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="SettingDlg.h" />
+    <ClInclude Include="StartDebate.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AboutDlg.cpp" />
     <ClCompile Include="DebateTimer.cpp" />
     <ClCompile Include="DebateTimerDlg.cpp" />
+    <ClCompile Include="ParseJson.cpp" />
+    <ClCompile Include="SettingDlg.cpp" />
+    <ClCompile Include="StartDebate.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
