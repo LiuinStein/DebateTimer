@@ -7,7 +7,7 @@
 /*
  * 从json中读取规则
  */
-bool get_rule_from_json(std::vector<SRule>& __rule, const char * __json)
+bool get_rule_from_json(DebateRules& __rule, const char * __json)
 {
 	__rule.clear();
 	Json::Reader jsonReader(Json::Features::strictMode());
@@ -38,7 +38,7 @@ bool get_rule_from_json(std::vector<SRule>& __rule, const char * __json)
 /*
  * 从规则生成json
  */
-bool get_json_from_rule(std::string & __json, const std::vector<SRule>& __rule)
+bool get_json_from_rule(std::string & __json, const DebateRules& __rule)
 {
 	__json.clear();
 	if (!__rule.size())

@@ -200,6 +200,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AboutDlg.cpp" />
+    <ClCompile Include="Core.cpp" />
     <ClCompile Include="DebateTimer.cpp" />
     <ClCompile Include="DebateTimerDlg.cpp" />
     <ClCompile Include="ParseJson.cpp" />

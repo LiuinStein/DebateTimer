@@ -1,31 +1,4 @@
-#pragma once
-#ifndef __DATA_STRUCT_H
-#define __DATA_STRUCT_H
-#include <string>
-#include <vector>
 
-// 规则集
-struct SRule
-{
-	unsigned m_nID;				// 顺序id
-	std::string m_strChapter;		// 该项名称
-	unsigned m_nTime;				// 该项时间
-	unsigned m_nTimerNum;			// 时钟数目,最多4个时钟
-	std::vector<std::string> m_vecTimerName;	// 各时钟名称
-
-	// 用来排序
-	bool operator<(SRule & __rhs)const
-	{
-		return m_nID < __rhs.m_nID;
-	}
-};
-
-typedef std::vector<SRule> DebateRules;
-// 默认规则文件
-static const char * g_strRuleFile = "rule.json";
-// 默认规则
-static const char * g_strDefaultRule{
-R"(
 [
     {
         "id": 1,
@@ -154,6 +127,4 @@ R"(
             "剩余时间"
         ]
     }
-])" };
-
-#endif
+]

@@ -9,6 +9,8 @@
 #include "AboutDlg.h"
 #include "SettingDlg.h"
 #include "StartDebate.h"
+#include "Core.h"
+#include "ParseJson.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -50,7 +52,14 @@ BOOL CDebateTimerDlg::OnInitDialog()
 	SetIcon(m_hIcon, TRUE);			// Set big icon
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
-	// TODO: Add extra initialization here
+	// 从默认文件中读入规则
+	if(!get_rule_from_file(g_drAllRules))
+	{
+		// 文件不存在,写入文件
+		write_to_file(g_strDefaultRule, g_strRuleFile);
+		// 读取默认设置
+		get_rule_from_json(g_drAllRules, g_strDefaultRule);
+	}
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
