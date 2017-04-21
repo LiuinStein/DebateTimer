@@ -3,6 +3,7 @@
 #define __CORE_H
 #include "DataStruct.h"
 
+// 当前规则
 extern DebateRules g_drAllRules;
 
 /*

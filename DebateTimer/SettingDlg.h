@@ -1,5 +1,6 @@
 #pragma once
 #include "afxcmn.h"
+#include <string>
 
 
 // CSettingDlg dialog
@@ -27,4 +28,10 @@ public:
 private:
 	// 规则列表
 	CListCtrl m_listRule;
+	// 当前操作文件
+	std::string m_strOpenFile;
+
+public:
+	void RefreshList();
+	afx_msg void OnBnClickedBtnSave();
 };

@@ -24,6 +24,7 @@ bool get_rule_from_json(DebateRules& __rule, const char * __json)
 			tmp.m_strChapter = jsonVal[i]["chapter"].asString();
 			tmp.m_nTime = jsonVal[i]["time"].asUInt();
 			tmp.m_nTimerNum = jsonVal[i]["timer"].asUInt();
+			tmp.m_vecTimerName.clear();
 			for (int j = 0; j < jsonVal[i]["timer_name"].size(); j++)
 			{
 				tmp.m_vecTimerName.push_back(jsonVal[i]["timer_name"][j].asString());
