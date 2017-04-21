@@ -1,6 +1,7 @@
 #pragma once
 #include "afxcmn.h"
 #include <string>
+#include "DataStruct.h"
 
 
 // CSettingDlg dialog
@@ -30,8 +31,14 @@ private:
 	CListCtrl m_listRule;
 	// 当前操作文件
 	std::string m_strOpenFile;
+	// 当前页面规则
+	DebateRules m_drThisPage;
 
 public:
 	void RefreshList();
 	afx_msg void OnBnClickedBtnSave();
+	afx_msg void OnBnClickedBtnImport();
+	afx_msg void OnBnClickedBtnSaveas();
+	afx_msg void OnBnClickedBtnSetdefault();
+	afx_msg void OnBnClickedBtnApply();
 };

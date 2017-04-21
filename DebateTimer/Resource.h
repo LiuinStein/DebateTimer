@@ -22,6 +22,9 @@
 #define IDC_BTN_SAVE                    1014
 #define IDC_BTN_SAVEAS                  1015
 #define IDC_BTN_IMPORT                  1016
+#define IDC_BTN_SETDEFAULT              1017
+#define IDC_BTN_APPLY                   1018
+#define IDC_BTN_CANCEL                  1019
 
 // Next default values for new objects
 // 
@@ -29,7 +32,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        137
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1017
+#define _APS_NEXT_CONTROL_VALUE         1020
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
