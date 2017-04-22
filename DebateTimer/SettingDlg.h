@@ -33,12 +33,16 @@ private:
 	std::string m_strOpenFile;
 	// 当前页面规则
 	DebateRules m_drThisPage;
+	// 是否进行了操作
+	bool m_bIsOper;
 
 public:
 	void RefreshList();
+	void SaveToFile();
 	afx_msg void OnBnClickedBtnSave();
 	afx_msg void OnBnClickedBtnImport();
 	afx_msg void OnBnClickedBtnSaveas();
 	afx_msg void OnBnClickedBtnSetdefault();
 	afx_msg void OnBnClickedBtnApply();
+	afx_msg void OnBnClickedBtnCancel();
 };

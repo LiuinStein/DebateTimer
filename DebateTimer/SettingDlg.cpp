@@ -37,6 +37,7 @@ BEGIN_MESSAGE_MAP(CSettingDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BTN_SAVEAS, &CSettingDlg::OnBnClickedBtnSaveas)
 	ON_BN_CLICKED(IDC_BTN_SETDEFAULT, &CSettingDlg::OnBnClickedBtnSetdefault)
 	ON_BN_CLICKED(IDC_BTN_APPLY, &CSettingDlg::OnBnClickedBtnApply)
+	ON_BN_CLICKED(IDC_BTN_CANCEL, &CSettingDlg::OnBnClickedBtnCancel)
 END_MESSAGE_MAP()
 
 
@@ -56,6 +57,7 @@ BOOL CSettingDlg::OnInitDialog()
 	CDialogEx::OnInitDialog();
 	m_strOpenFile = g_strRuleFile;	// 设置默认操作文件
 	m_drThisPage = g_drAllRules;		// 拷贝配置
+	m_bIsOper = false;					// 默认没进行操作
 	// 初始化List
 	m_listRule.SetExtendedStyle(m_listRule.GetExtendedStyle() | LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 	m_listRule.InsertColumn(0, _T("编号"), LVCFMT_CENTER, 60, 50);
@@ -101,8 +103,8 @@ void CSettingDlg::RefreshList()
 	}
 }
 
-// 保存按钮,如果是从别的文件导入的,那么将其保存到这个文件,如果是默认设置就将其保存至rule.json文件
-void CSettingDlg::OnBnClickedBtnSave()
+// 保存到文件
+void CSettingDlg::SaveToFile()
 {
 	if (!write_rule_to_file(m_drThisPage, m_strOpenFile.c_str()))
 		MessageBoxW(_T("保存到文件失败"), 0, MB_OK | MB_ICONERROR);
@@ -110,11 +112,17 @@ void CSettingDlg::OnBnClickedBtnSave()
 		MessageBoxW(CString{ ("成功保存至文件" + m_strOpenFile).c_str() }, 0, MB_OK | MB_ICONINFORMATION);
 }
 
+// 保存按钮,如果是从别的文件导入的,那么将其保存到这个文件,如果是默认设置就将其保存至rule.json文件
+void CSettingDlg::OnBnClickedBtnSave()
+{
+	SaveToFile();
+}
+
 // 从文件导入规则按钮
 void CSettingDlg::OnBnClickedBtnImport()
 {
 	// 弹出一个打开对话框
-	CFileDialog openFile(TRUE, 0, NULL, OFN_HIDEREADONLY | OFN_READONLY, _T("配置文件 (*.json)|*.json||"), NULL);
+	CFileDialog openFile(TRUE, 0, NULL, OFN_HIDEREADONLY | OFN_READONLY, _T("配置文件 (*.json)|*.json|所有文件 (*.*)|*.*||"), NULL);
 	openFile.DoModal();
 	CString cstrFilePath{ openFile.GetPathName() };
 	if(cstrFilePath != _T(""))
@@ -134,7 +142,7 @@ void CSettingDlg::OnBnClickedBtnImport()
 void CSettingDlg::OnBnClickedBtnSaveas()
 {
 	// 弹出一个另存为对话框
-	CFileDialog saveFile(FALSE, 0, 0, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, _T("配置文件 (*.json)|*.json||"), NULL);
+	CFileDialog saveFile(FALSE, 0, 0, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, _T("配置文件 (*.json)|*.json|所有文件 (*.*)|*.*||"), NULL);
 	saveFile.DoModal();
 	CString cstrFilePath{ saveFile.GetPathName() };
 	if (cstrFilePath != _T(""))
@@ -152,6 +160,8 @@ void CSettingDlg::OnBnClickedBtnSaveas()
 // 载入默认规则按钮
 void CSettingDlg::OnBnClickedBtnSetdefault()
 {
+	if (IDNO == MessageBoxW(_T("载入默认设置后当前的更改将会被丢弃,是否确认"), 0, MB_YESNO | MB_ICONINFORMATION))
+		return;
 	if(!get_rule_from_json(m_drThisPage, g_strDefaultRule))
 	{
 		MessageBoxW(_T("载入默认规则失败"), 0, MB_OK | MB_ICONERROR);
@@ -166,3 +176,12 @@ void CSettingDlg::OnBnClickedBtnApply()
 	g_drAllRules = m_drThisPage;
 	MessageBoxW(_T("应用规则成功"), 0, MB_OK | MB_ICONINFORMATION);
 }
+
+// 取消按钮
+void CSettingDlg::OnBnClickedBtnCancel()
+{
+	if(m_bIsOper && IDYES == MessageBoxW(_T("是否将更改保存到配置文件"),0,MB_YESNO|MB_ICONINFORMATION))
+		SaveToFile();
+	this->OnCancel();
+}
+
