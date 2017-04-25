@@ -29,6 +29,7 @@ void CSettingDlg::DoDataExchange(CDataExchange* pDX)
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_LIST1, m_listRule);
 	DDX_Control(pDX, IDC_EDIT_LIST, m_editListEdit);
+	DDX_Control(pDX, IDC_EDIT_LIST_NUM, m_editListEditNum);
 }
 
 
@@ -48,6 +49,7 @@ BEGIN_MESSAGE_MAP(CSettingDlg, CDialogEx)
 	ON_EN_KILLFOCUS(IDC_EDIT_LIST, &CSettingDlg::OnKillfocusEditList)
 	ON_COMMAND(ID__32777, &CSettingDlg::OnMoveUp)
 	ON_COMMAND(ID__32778, &CSettingDlg::OnMoveDown)
+	ON_EN_KILLFOCUS(IDC_EDIT_LIST_NUM, &CSettingDlg::OnKillfocusEditListNum)
 END_MESSAGE_MAP()
 
 
@@ -75,7 +77,9 @@ BOOL CSettingDlg::OnInitDialog()
 	m_bIsOper = false;					// 默认没进行操作
 	m_nClickListLine = -1;				// 默认没有选中行
 	m_nClickListCol = -1;				// 默认没有选中列
+	m_editopt = nullptr;				// 初始化操作指针
 	m_editListEdit.ShowWindow(SW_HIDE);	// 设置浮动文本框不可见
+	m_editListEditNum.ShowWindow(SW_HIDE);
 	// 初始化List
 	m_listRule.SetExtendedStyle(m_listRule.GetExtendedStyle() | LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 	m_listRule.InsertColumn(0, _T("编号"), LVCFMT_CENTER, 60, 50);
@@ -134,36 +138,39 @@ void CSettingDlg::SaveToFile()
 // 修改列表
 void CSettingDlg::ChangeList()
 {
-	if(m_nClickListCol != 0 && m_nClickListCol != -1)
+	if(m_nClickListCol > 0)
 	{
+		m_editopt = m_nClickListCol == 2 || m_nClickListCol == 3 ? &m_editListEditNum : &m_editListEdit;
 		// 如果选择的是子项
 		CRect rc;
 		// 获取子项的RECT
 		m_listRule.GetSubItemRect(m_nClickListLine, m_nClickListCol, LVIR_LABEL, rc);
 		// 转换坐标到列表框中的坐标
-		m_editListEdit.SetParent(&m_listRule);
+		m_editopt->SetParent(&m_listRule);
 		// 将文本框移动到RECT所示范围
-		m_editListEdit.MoveWindow(rc);
+		m_editopt->MoveWindow(rc);
 		// 将子项中的值放在Edit控件中
-		m_editListEdit.SetWindowTextW(m_listRule.GetItemText(m_nClickListLine, m_nClickListCol));
+		m_editopt->SetWindowTextW(m_listRule.GetItemText(m_nClickListLine, m_nClickListCol));
 		// 显示文本框
-		m_editListEdit.ShowWindow(SW_SHOW);
+		m_editopt->ShowWindow(SW_SHOW);
 		// 设置焦点
-		m_editListEdit.SetFocus();
+		m_editopt->SetFocus();
 		// 设置光标
-		m_editListEdit.ShowCaret();
+		m_editopt->ShowCaret();
 		// 光标移到最后
-		m_editListEdit.SetSel(-1);
+		m_editopt->SetSel(-1);
 	}
 }
 
 // 当文本框失去焦点或按下回车时
 void CSettingDlg::OnApplyList()
 {
+	if (!m_editopt)
+		return;
 	CString tmp;
-	m_editListEdit.GetWindowTextW(tmp);
+	m_editopt->GetWindowTextW(tmp);
 	m_listRule.SetItemText(m_nClickListLine, m_nClickListCol, tmp);
-	m_editListEdit.ShowWindow(SW_HIDE);
+	m_editopt->ShowWindow(SW_HIDE);
 }
 
 // 依据列表刷新规则
@@ -171,20 +178,23 @@ void CSettingDlg::RefreshRules()
 {
 	m_drThisPage.clear();
 	USES_CONVERSION;
-	for (int i = 0; i < m_listRule.GetItemCount(); i++)
+	for (int i = 0, j = 0; i < m_listRule.GetItemCount(); i++)
 	{
+		if (m_listRule.GetItemText(j, 2).IsEmpty() || m_listRule.GetItemText(j, 3).IsEmpty())
+			continue;
 		SRule tmp;
-		tmp.m_nID = _ttoi(m_listRule.GetItemText(i, 0));
-		tmp.m_strChapter = W2A(m_listRule.GetItemText(i, 1));
-		tmp.m_nTime = _ttoi(m_listRule.GetItemText(i, 2));
-		tmp.m_nTimerNum = _ttoi(m_listRule.GetItemText(i, 3));
-		for (int j = 4; j < 8; j++)
+		tmp.m_nID = _ttoi(m_listRule.GetItemText(j, 0));
+		tmp.m_strChapter = W2A(m_listRule.GetItemText(j, 1));
+		tmp.m_nTime = _ttoi(m_listRule.GetItemText(j, 2));
+		tmp.m_nTimerNum = _ttoi(m_listRule.GetItemText(j, 3));
+		for (int p = 4; p < 8; p++)
 		{
-			if (0 != m_listRule.GetItemText(i, j).GetLength())
+			if (0 != m_listRule.GetItemText(j, p).GetLength())
 			{
-				tmp.m_vecTimerName.push_back(W2A(m_listRule.GetItemText(i, j)));
+				tmp.m_vecTimerName.push_back(W2A(m_listRule.GetItemText(j, p)));
 			}
 		}
+		j++;
 		m_drThisPage.push_back(tmp);
 	}
 }
@@ -378,4 +388,10 @@ void CSettingDlg::OnMoveUp()
 void CSettingDlg::OnMoveDown()
 {
 	OnMoveLine(1);
+}
+
+// 列表文本框失去焦点
+void CSettingDlg::OnKillfocusEditListNum()
+{
+	OnApplyList();
 }

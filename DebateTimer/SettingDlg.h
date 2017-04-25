@@ -32,6 +32,8 @@ private:
 	CListCtrl m_listRule;
 	// List的浮动编辑框
 	CEdit m_editListEdit;
+	CEdit m_editListEditNum;
+	CEdit * m_editopt;
 	// 当前操作文件
 	std::string m_strOpenFile;
 	// 当前页面规则
@@ -67,4 +69,5 @@ public:
 	afx_msg void OnKillfocusEditList();
 	afx_msg void OnMoveUp();
 	afx_msg void OnMoveDown();
+	afx_msg void OnKillfocusEditListNum();
 };
