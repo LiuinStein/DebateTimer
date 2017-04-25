@@ -189,6 +189,17 @@ void CSettingDlg::RefreshRules()
 	}
 }
 
+// 刷新列表编号
+void CSettingDlg::RefreshLineNum()
+{
+	CString tmp;
+	for (int i = 0; i < m_listRule.GetItemCount(); i++)
+	{
+		tmp.Format(_T("%d"), i + 1);
+		m_listRule.SetItemText(i, 0, tmp);
+	}
+}
+
 // 将列表框中的当前行向上或向下移动__m个单位长度,__m为正往下移动,为负向上移动
 void CSettingDlg::OnMoveLine(int __m)
 {
@@ -204,6 +215,14 @@ void CSettingDlg::OnMoveLine(int __m)
 			m_listRule.SetItemText(n2, i, tmp);
 		}
 	}
+}
+
+// 以列表框当前行为基准,向上或向下插入行,__m为正向下插入,为负向上插入
+void CSettingDlg::OnInsertLine(int __m)
+{
+	// 向上插入和向下插入都是列表下移的过程
+	m_listRule.InsertItem(m_nClickListLine + __m,_T(""));
+	RefreshLineNum();
 }
 
 // 保存按钮,如果是从别的文件导入的,那么将其保存到这个文件,如果是默认设置就将其保存至rule.json文件
@@ -313,19 +332,20 @@ void CSettingDlg::OnChangeList()
 // 右键菜单向上插入
 void CSettingDlg::OnInsertUp()
 {
-
+	OnInsertLine(0);
 }
 
 // 右键菜单向下插入
 void CSettingDlg::OnInsertDown()
 {
-
+	OnInsertLine(1);
 }
 
 // 右键菜单删除此行
 void CSettingDlg::OnDeleteLine()
 {
-
+	m_listRule.DeleteItem(m_nClickListLine);
+	RefreshLineNum();
 }
 
 // 双击List的事件响应

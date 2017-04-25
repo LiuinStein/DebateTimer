@@ -49,7 +49,9 @@ public:
 	void ChangeList();
 	void OnApplyList();
 	void RefreshRules();
+	void RefreshLineNum();
 	void OnMoveLine(int __m);
+	void OnInsertLine(int __m);
 	afx_msg void OnBnClickedBtnSave();
 	afx_msg void OnBnClickedBtnImport();
 	afx_msg void OnBnClickedBtnSaveas();
