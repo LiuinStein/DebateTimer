@@ -2,6 +2,7 @@
 #include "afxcmn.h"
 #include <string>
 #include "DataStruct.h"
+#include "afxwin.h"
 
 
 // CSettingDlg dialog
@@ -29,20 +30,39 @@ public:
 private:
 	// 规则列表
 	CListCtrl m_listRule;
+	// List的浮动编辑框
+	CEdit m_editListEdit;
 	// 当前操作文件
 	std::string m_strOpenFile;
 	// 当前页面规则
 	DebateRules m_drThisPage;
 	// 是否进行了操作
 	bool m_bIsOper;
+	// 选中的行数
+	int m_nClickListLine;
+	// 选中的列数
+	int m_nClickListCol;
 
 public:
 	void RefreshList();
 	void SaveToFile();
+	void ChangeList();
+	void OnApplyList();
+	void RefreshRules();
+	void OnMoveLine(int __m);
 	afx_msg void OnBnClickedBtnSave();
 	afx_msg void OnBnClickedBtnImport();
 	afx_msg void OnBnClickedBtnSaveas();
 	afx_msg void OnBnClickedBtnSetdefault();
 	afx_msg void OnBnClickedBtnApply();
 	afx_msg void OnBnClickedBtnCancel();
+	afx_msg void OnRclickList(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnChangeList();
+	afx_msg void OnInsertUp();
+	afx_msg void OnInsertDown();
+	afx_msg void OnDeleteLine();
+	afx_msg void OnDblclkList(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnKillfocusEditList();
+	afx_msg void OnMoveUp();
+	afx_msg void OnMoveDown();
 };

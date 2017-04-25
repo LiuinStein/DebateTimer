@@ -28,6 +28,7 @@ void CSettingDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_LIST1, m_listRule);
+	DDX_Control(pDX, IDC_EDIT_LIST, m_editListEdit);
 }
 
 
@@ -38,6 +39,15 @@ BEGIN_MESSAGE_MAP(CSettingDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BTN_SETDEFAULT, &CSettingDlg::OnBnClickedBtnSetdefault)
 	ON_BN_CLICKED(IDC_BTN_APPLY, &CSettingDlg::OnBnClickedBtnApply)
 	ON_BN_CLICKED(IDC_BTN_CANCEL, &CSettingDlg::OnBnClickedBtnCancel)
+	ON_NOTIFY(NM_RCLICK, IDC_LIST1, &CSettingDlg::OnRclickList)
+	ON_COMMAND(ID_32773, &CSettingDlg::OnChangeList)
+	ON_COMMAND(ID_32774, &CSettingDlg::OnInsertUp)
+	ON_COMMAND(ID__32775, &CSettingDlg::OnInsertDown)
+	ON_COMMAND(ID__32776, &CSettingDlg::OnDeleteLine)
+	ON_NOTIFY(NM_DBLCLK, IDC_LIST1, &CSettingDlg::OnDblclkList)
+	ON_EN_KILLFOCUS(IDC_EDIT_LIST, &CSettingDlg::OnKillfocusEditList)
+	ON_COMMAND(ID__32777, &CSettingDlg::OnMoveUp)
+	ON_COMMAND(ID__32778, &CSettingDlg::OnMoveDown)
 END_MESSAGE_MAP()
 
 
@@ -48,6 +58,11 @@ BOOL CSettingDlg::PreTranslateMessage(MSG* pMsg)
 {
 	if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_ESCAPE)
 		return TRUE;
+	if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN)
+	{
+		OnApplyList();
+		return TRUE;
+	}
 	return CDialogEx::PreTranslateMessage(pMsg);
 }
 
@@ -58,6 +73,9 @@ BOOL CSettingDlg::OnInitDialog()
 	m_strOpenFile = g_strRuleFile;	// 设置默认操作文件
 	m_drThisPage = g_drAllRules;		// 拷贝配置
 	m_bIsOper = false;					// 默认没进行操作
+	m_nClickListLine = -1;				// 默认没有选中行
+	m_nClickListCol = -1;				// 默认没有选中列
+	m_editListEdit.ShowWindow(SW_HIDE);	// 设置浮动文本框不可见
 	// 初始化List
 	m_listRule.SetExtendedStyle(m_listRule.GetExtendedStyle() | LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 	m_listRule.InsertColumn(0, _T("编号"), LVCFMT_CENTER, 60, 50);
@@ -106,10 +124,86 @@ void CSettingDlg::RefreshList()
 // 保存到文件
 void CSettingDlg::SaveToFile()
 {
+	RefreshRules();
 	if (!write_rule_to_file(m_drThisPage, m_strOpenFile.c_str()))
 		MessageBoxW(_T("保存到文件失败"), 0, MB_OK | MB_ICONERROR);
 	else
 		MessageBoxW(CString{ ("成功保存至文件" + m_strOpenFile).c_str() }, 0, MB_OK | MB_ICONINFORMATION);
+}
+
+// 修改列表
+void CSettingDlg::ChangeList()
+{
+	if(m_nClickListCol != 0 && m_nClickListCol != -1)
+	{
+		// 如果选择的是子项
+		CRect rc;
+		// 获取子项的RECT
+		m_listRule.GetSubItemRect(m_nClickListLine, m_nClickListCol, LVIR_LABEL, rc);
+		// 转换坐标到列表框中的坐标
+		m_editListEdit.SetParent(&m_listRule);
+		// 将文本框移动到RECT所示范围
+		m_editListEdit.MoveWindow(rc);
+		// 将子项中的值放在Edit控件中
+		m_editListEdit.SetWindowTextW(m_listRule.GetItemText(m_nClickListLine, m_nClickListCol));
+		// 显示文本框
+		m_editListEdit.ShowWindow(SW_SHOW);
+		// 设置焦点
+		m_editListEdit.SetFocus();
+		// 设置光标
+		m_editListEdit.ShowCaret();
+		// 光标移到最后
+		m_editListEdit.SetSel(-1);
+	}
+}
+
+// 当文本框失去焦点或按下回车时
+void CSettingDlg::OnApplyList()
+{
+	CString tmp;
+	m_editListEdit.GetWindowTextW(tmp);
+	m_listRule.SetItemText(m_nClickListLine, m_nClickListCol, tmp);
+	m_editListEdit.ShowWindow(SW_HIDE);
+}
+
+// 依据列表刷新规则
+void CSettingDlg::RefreshRules()
+{
+	m_drThisPage.clear();
+	USES_CONVERSION;
+	for (int i = 0; i < m_listRule.GetItemCount(); i++)
+	{
+		SRule tmp;
+		tmp.m_nID = _ttoi(m_listRule.GetItemText(i, 0));
+		tmp.m_strChapter = W2A(m_listRule.GetItemText(i, 1));
+		tmp.m_nTime = _ttoi(m_listRule.GetItemText(i, 2));
+		tmp.m_nTimerNum = _ttoi(m_listRule.GetItemText(i, 3));
+		for (int j = 4; j < 8; j++)
+		{
+			if (0 != m_listRule.GetItemText(i, j).GetLength())
+			{
+				tmp.m_vecTimerName.push_back(W2A(m_listRule.GetItemText(i, j)));
+			}
+		}
+		m_drThisPage.push_back(tmp);
+	}
+}
+
+// 将列表框中的当前行向上或向下移动__m个单位长度,__m为正往下移动,为负向上移动
+void CSettingDlg::OnMoveLine(int __m)
+{
+	if (__m != 0 && m_nClickListLine + __m < m_listRule.GetItemCount() && m_nClickListLine + __m >= 0)
+	{
+		// 交换移动的两列的内容
+		CString tmp;
+		int n1{ m_nClickListLine }, n2{ m_nClickListLine + __m };
+		for (int i = 1; i < 8; i++)
+		{
+			tmp = m_listRule.GetItemText(n1, i);
+			m_listRule.SetItemText(n1, i, m_listRule.GetItemText(n2, i));
+			m_listRule.SetItemText(n2, i, tmp);
+		}
+	}
 }
 
 // 保存按钮,如果是从别的文件导入的,那么将其保存到这个文件,如果是默认设置就将其保存至rule.json文件
@@ -144,6 +238,7 @@ void CSettingDlg::OnBnClickedBtnSaveas()
 	// 弹出一个另存为对话框
 	CFileDialog saveFile(FALSE, 0, 0, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, _T("配置文件 (*.json)|*.json|所有文件 (*.*)|*.*||"), NULL);
 	saveFile.DoModal();
+	RefreshRules();
 	CString cstrFilePath{ saveFile.GetPathName() };
 	if (cstrFilePath != _T(""))
 	{
@@ -167,12 +262,14 @@ void CSettingDlg::OnBnClickedBtnSetdefault()
 		MessageBoxW(_T("载入默认规则失败"), 0, MB_OK | MB_ICONERROR);
 		return;
 	}
+	RefreshList();
 	MessageBoxW(_T("载入默认规则成功"), 0, MB_OK | MB_ICONINFORMATION);
 }
 
 // 应用按钮
 void CSettingDlg::OnBnClickedBtnApply()
 {
+	RefreshRules();
 	g_drAllRules = m_drThisPage;
 	MessageBoxW(_T("应用规则成功"), 0, MB_OK | MB_ICONINFORMATION);
 }
@@ -185,3 +282,80 @@ void CSettingDlg::OnBnClickedBtnCancel()
 	this->OnCancel();
 }
 
+
+// 右键列表某一规则的事件响应
+void CSettingDlg::OnRclickList(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
+	NM_LISTVIEW * pNMListView = reinterpret_cast<NM_LISTVIEW*>(pNMHDR);
+	m_nClickListLine = pNMListView->iItem;	// 获取选中行信息
+	m_nClickListCol = pNMListView->iSubItem;	// 获取选中的列信息
+	POSITION pos = m_listRule.GetFirstSelectedItemPosition();
+	if (m_listRule.GetNextSelectedItem(pos) == -1)
+		return;		//如果没有选中的项目，返回
+	//显示弹出菜单
+	CPoint point;
+	GetCursorPos(&point);
+	CMenu menu;
+	menu.LoadMenu(IDR_MENU_SETTING);//获取菜单的资源
+	CMenu* popup = menu.GetSubMenu(0);//只获取第一个列菜单的指针
+	//弹出菜单显示
+	popup->TrackPopupMenu(TPM_RIGHTBUTTON | TPM_LEFTALIGN, point.x, point.y, this);
+	*pResult = 0;
+}
+
+// 右键菜单中编辑按钮
+void CSettingDlg::OnChangeList()
+{
+	ChangeList();
+}
+
+// 右键菜单向上插入
+void CSettingDlg::OnInsertUp()
+{
+
+}
+
+// 右键菜单向下插入
+void CSettingDlg::OnInsertDown()
+{
+
+}
+
+// 右键菜单删除此行
+void CSettingDlg::OnDeleteLine()
+{
+
+}
+
+// 双击List的事件响应
+void CSettingDlg::OnDblclkList(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
+	NM_LISTVIEW * pNMListView = reinterpret_cast<NM_LISTVIEW*>(pNMHDR);
+	m_nClickListLine = pNMListView->iItem;	// 获取选中行信息
+	m_nClickListCol = pNMListView->iSubItem;	// 获取选中的列信息
+	POSITION pos = m_listRule.GetFirstSelectedItemPosition();
+	if (m_listRule.GetNextSelectedItem(pos) == -1)
+		return;		//如果没有选中的项目，返回
+	ChangeList();
+	*pResult = 0;
+}
+
+// 列表文本框失去焦点
+void CSettingDlg::OnKillfocusEditList()
+{
+	OnApplyList();
+}
+
+// 向上移动按钮
+void CSettingDlg::OnMoveUp()
+{
+	OnMoveLine(-1);
+}
+
+// 向下移动按钮
+void CSettingDlg::OnMoveDown()
+{
+	OnMoveLine(1);
+}
