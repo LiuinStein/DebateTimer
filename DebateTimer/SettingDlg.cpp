@@ -183,13 +183,13 @@ void CSettingDlg::RefreshRules()
 		if (m_listRule.GetItemText(j, 2).IsEmpty() || m_listRule.GetItemText(j, 3).IsEmpty())
 			continue;
 		SRule tmp;
-		tmp.m_nID = _ttoi(m_listRule.GetItemText(j, 0));
+		tmp.m_nID = j;
 		tmp.m_strChapter = W2A(m_listRule.GetItemText(j, 1));
 		tmp.m_nTime = _ttoi(m_listRule.GetItemText(j, 2));
 		tmp.m_nTimerNum = _ttoi(m_listRule.GetItemText(j, 3));
 		for (int p = 4; p < 8; p++)
 		{
-			if (0 != m_listRule.GetItemText(j, p).GetLength())
+			if (!m_listRule.GetItemText(j, p).IsEmpty())
 			{
 				tmp.m_vecTimerName.push_back(W2A(m_listRule.GetItemText(j, p)));
 			}
@@ -303,7 +303,7 @@ void CSettingDlg::OnBnClickedBtnApply()
 	MessageBoxW(_T("应用规则成功"), 0, MB_OK | MB_ICONINFORMATION);
 }
 
-// 取消按钮
+// 关闭按钮
 void CSettingDlg::OnBnClickedBtnCancel()
 {
 	if(m_bIsOper && IDYES == MessageBoxW(_T("是否将更改保存到配置文件"),0,MB_YESNO|MB_ICONINFORMATION))
