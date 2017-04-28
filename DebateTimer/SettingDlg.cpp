@@ -88,8 +88,6 @@ BOOL CSettingDlg::OnInitDialog()
 	m_listRule.InsertColumn(3, _T("时钟数目"), LVCFMT_CENTER, 120, 50);
 	m_listRule.InsertColumn(4, _T("时钟1说明"), LVCFMT_CENTER, 120, 50);
 	m_listRule.InsertColumn(5, _T("时钟2说明"), LVCFMT_CENTER, 120, 50);
-	m_listRule.InsertColumn(6, _T("时钟3说明"), LVCFMT_CENTER, 120, 50);
-	m_listRule.InsertColumn(7, _T("时钟4说明"), LVCFMT_CENTER, 120, 50);
 	// 刷新列表
 	RefreshList();
 
@@ -100,6 +98,7 @@ BOOL CSettingDlg::OnInitDialog()
 // 刷新列表
 void CSettingDlg::RefreshList()
 {
+	m_listRule.DeleteAllItems();
 	sort(m_drThisPage.begin(), m_drThisPage.end());
 	CString tmp;
 	for (int i = 0; i < m_drThisPage.size(); i++)
@@ -169,6 +168,12 @@ void CSettingDlg::OnApplyList()
 		return;
 	CString tmp;
 	m_editopt->GetWindowTextW(tmp);
+	// 先检查一下输入的合法性,2和3只能输入数字,且必需大于等于1
+	if((m_nClickListCol == 2 || m_nClickListCol == 3) && _ttoi(tmp) < 1)
+	{
+		m_editopt->ShowBalloonTip(_T("错误!"), _T("你必需在此处输入大于等于1的数字!"), TTI_ERROR);
+		return;
+	}
 	m_listRule.SetItemText(m_nClickListLine, m_nClickListCol, tmp);
 	m_editopt->ShowWindow(SW_HIDE);
 }
@@ -187,7 +192,7 @@ void CSettingDlg::RefreshRules()
 		tmp.m_strChapter = W2A(m_listRule.GetItemText(j, 1));
 		tmp.m_nTime = _ttoi(m_listRule.GetItemText(j, 2));
 		tmp.m_nTimerNum = _ttoi(m_listRule.GetItemText(j, 3));
-		for (int p = 4; p < 8; p++)
+		for (int p = 4; p < 6; p++)
 		{
 			if (!m_listRule.GetItemText(j, p).IsEmpty())
 			{
@@ -215,12 +220,10 @@ void CSettingDlg::OnMoveLine(int __m)
 {
 	if (__m != 0 && m_nClickListLine + __m < m_listRule.GetItemCount() && m_nClickListLine + __m >= 0)
 	{
-		// 交换移动的两列的内容
-		CString tmp;
 		int n1{ m_nClickListLine }, n2{ m_nClickListLine + __m };
-		for (int i = 1; i < 8; i++)
+		for (int i = 1; i < 6; i++)
 		{
-			tmp = m_listRule.GetItemText(n1, i);
+			CString tmp = m_listRule.GetItemText(n1, i);
 			m_listRule.SetItemText(n1, i, m_listRule.GetItemText(n2, i));
 			m_listRule.SetItemText(n2, i, tmp);
 		}

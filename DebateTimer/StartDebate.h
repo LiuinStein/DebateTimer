@@ -23,7 +23,11 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 private:
-	long m_alTimer[4];			// 四个时钟
+	int m_aTimer[2];			// 定义两个时钟
+	bool m_bActiveFirst;		// 为true的时候第一个时钟激活,为false的时候第二个时钟激活
+	bool m_bStartFirst;		// 为true的时候为第一次启动项目,为false的时候为第二次启动项目
+	bool m_bIsStop;			// 点击暂停按钮会将其置为true
+	int m_nItemNum;			// 进行到第几个环节
 	CButton m_btnStart;		// 开始按钮
 	CButton m_btnStop;			// 停止按钮
 	CButton m_btnResetThis;	// 重置本节
@@ -34,7 +38,23 @@ private:
 	CButton m_btnExit;			// 退出按钮
 	CStatic m_stcTitle;		// 环节标题框
 	CStatic m_stcShowTime;		// 计数器显示框
+	CStatic m_stcTimerName;	// 计数器名称框
 	CBrush m_brushBlue;		// 蓝色画刷
+	CFont m_font;
+
+
+	// 设置静态文本框的字体大小
+	void SetStaticCtlFontSize(CStatic & __s, double __nps);
+	// 打印项目标题
+	void PrintTitle();
+	// 打印计数器名称
+	void PrintTimerName();
+	// 重置时钟
+	void ResetTimer();
+	// 打印时钟信息
+	void PrintTimer();
+	// 重置本节
+	void ResetItem();
 
 public:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);

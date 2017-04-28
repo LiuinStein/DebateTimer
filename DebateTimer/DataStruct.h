@@ -10,7 +10,7 @@ struct SRule
 	unsigned m_nID;				// 顺序id
 	std::string m_strChapter;		// 该项名称
 	unsigned m_nTime;				// 该项时间
-	unsigned m_nTimerNum;			// 时钟数目,最多4个时钟
+	unsigned m_nTimerNum;			// 时钟数目,最多2个时钟
 	std::vector<std::string> m_vecTimerName;	// 各时钟名称
 
 	// 用来排序
@@ -33,7 +33,7 @@ R"(
         "time": 180,
         "timer": 1,
         "timer_name": [
-            "剩余时间"
+            "正方"
         ]
     },
     {
@@ -42,7 +42,7 @@ R"(
         "time": 90,
         "timer": 1,
         "timer_name": [
-            "剩余时间"
+            "反方"
         ]
     },
     {
@@ -51,7 +51,7 @@ R"(
         "time": 180,
         "timer": 1,
         "timer_name": [
-            "剩余时间"
+            "反方"
         ]
     },
     {
@@ -60,7 +60,7 @@ R"(
         "time": 90,
         "timer": 1,
         "timer_name": [
-            "剩余时间"
+            "正方"
         ]
     },
     {
@@ -69,7 +69,7 @@ R"(
         "time": 120,
         "timer": 1,
         "timer_name": [
-            "剩余时间"
+            "正方"
         ]
     },
     {
@@ -78,7 +78,7 @@ R"(
         "time": 120,
         "timer": 1,
         "timer_name": [
-            "剩余时间"
+            "反方"
         ]
     },
     {
@@ -87,7 +87,7 @@ R"(
         "time": 90,
         "timer": 1,
         "timer_name": [
-            "剩余时间"
+            "正方"
         ]
     },
     {
@@ -96,7 +96,7 @@ R"(
         "time": 120,
         "timer": 1,
         "timer_name": [
-            "剩余时间"
+            "正方"
         ]
     },
     {
@@ -105,7 +105,7 @@ R"(
         "time": 120,
         "timer": 1,
         "timer_name": [
-            "剩余时间"
+            "反方"
         ]
     },
     {
@@ -114,7 +114,7 @@ R"(
         "time": 90,
         "timer": 1,
         "timer_name": [
-            "剩余时间"
+            "正方"
         ]
     },
     {
@@ -123,7 +123,7 @@ R"(
         "time": 90,
         "timer": 1,
         "timer_name": [
-            "剩余时间"
+            "反方"
         ]
     },
     {
@@ -132,8 +132,8 @@ R"(
         "time": 480,
         "timer": 2,
         "timer_name": [
-            "正方剩余时间",
-            "反方剩余时间"            
+            "正方",
+            "反方"            
         ]        
     },
     {
@@ -142,7 +142,7 @@ R"(
         "time": 180,
         "timer": 1,
         "timer_name": [
-            "剩余时间"
+            "反方"
         ]
     },
     {
@@ -151,7 +151,7 @@ R"(
         "time": 180,
         "timer": 1,
         "timer_name": [
-            "剩余时间"
+            "正方"
         ]
     }
 ])" };

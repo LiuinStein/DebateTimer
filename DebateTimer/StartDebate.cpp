@@ -5,6 +5,7 @@
 #include "DebateTimer.h"
 #include "StartDebate.h"
 #include "afxdialogex.h"
+#include "Core.h"
 
 
 // CStartDebate dialog
@@ -34,6 +35,7 @@ void CStartDebate::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BTN_EXIT, m_btnExit);
 	DDX_Control(pDX, IDC_STC_TITLE, m_stcTitle);
 	DDX_Control(pDX, IDC_STC_SHOWTIME, m_stcShowTime);
+	DDX_Control(pDX, IDC_STC_TIMERNAME, m_stcTimerName);
 }
 
 
@@ -55,6 +57,75 @@ END_MESSAGE_MAP()
 
 // CStartDebate message handlers
 
+// 设置静态文本框的字体大小,设置为6大约可填充完整一个static框
+void CStartDebate::SetStaticCtlFontSize(CStatic & __s, double __nps)
+{
+	CRect stcRect;
+	__s.GetClientRect(stcRect);
+	m_font.CreatePointFont(__nps*stcRect.Height(), _T("Microsoft Sans Serif"));
+	__s.SetFont(&m_font);
+}
+
+// 打印项目标题
+void CStartDebate::PrintTitle()
+{
+	m_stcTitle.SetWindowTextW(CString{ g_drAllRules[m_nItemNum].m_strChapter.c_str() });
+}
+
+// 打印计数器名称
+void CStartDebate::PrintTimerName()
+{
+	const SRule & rule{ g_drAllRules[m_nItemNum] };
+	CString output;
+	CString tmp;
+	for (int i = 0; i < rule.m_nTimerNum; i++)
+	{
+		tmp.Format(_T("%s:\r\n"), CString{rule.m_vecTimerName[i].c_str()}.GetString());
+		output += tmp;
+	}
+	m_stcTimerName.SetWindowTextW(output);
+	SetStaticCtlFontSize(m_stcTimerName, 1.5);
+}
+
+// 重置时钟
+void CStartDebate::ResetTimer()
+{
+	m_aTimer[0] = g_drAllRules[m_nItemNum].m_nTime;
+	m_aTimer[1] = g_drAllRules[m_nItemNum].m_nTimerNum == 2 ? 
+		g_drAllRules[m_nItemNum].m_nTime : -1;
+}
+
+// 在静态框中打印时钟信息
+void CStartDebate::PrintTimer()
+{
+	const SRule & rule{ g_drAllRules[m_nItemNum] };
+	const unsigned nLineNum{ rule.m_nTimerNum / 2 + 1 };	// 需要打印的行数
+	CString output;
+	CString tmp;
+	for (int i = 0; i < rule.m_nTimerNum; i++)
+	{
+		tmp.Format(_T("%2d:%2d\r\n"), m_aTimer[i] / 60, m_aTimer[i] - 60 * int(m_aTimer[i] / 60));
+		output += tmp;
+	}
+	m_stcShowTime.SetWindowTextW(output);
+	SetStaticCtlFontSize(m_stcShowTime, 5.5 / nLineNum);
+}
+
+// 重置本节
+void CStartDebate::ResetItem()
+{
+	KillTimer(1);
+	m_bActiveFirst = true;
+	m_bStartFirst = true;
+	m_bIsStop = false;
+	m_btnStart.EnableWindow(TRUE);
+	m_btnStop.EnableWindow(FALSE);
+	ResetTimer();
+	PrintTitle();
+	PrintTimerName();
+	PrintTimer();
+}
+
 BOOL CStartDebate::PreTranslateMessage(MSG* pMsg)
 {
 	if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_ESCAPE)
@@ -66,11 +137,12 @@ BOOL CStartDebate::PreTranslateMessage(MSG* pMsg)
 BOOL CStartDebate::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
-	// 初始化时钟, 值为-1表名计时器未激活
-	for (int i = 0; i < 4; i++)
-		m_alTimer[i] = -1;
-	// 初始化计时器
-	SetTimer(1, 1000, NULL);
+	// 窗体初始化时必需载入一个合法的规则,如规则不合法,本页退出
+	if(g_drAllRules.empty())
+	{
+		MessageBoxW(_T("规则设定失败,请重新导入规则"), 0, MB_OK | MB_ICONERROR);
+		this->OnCancel();
+	}
 	// 初始化蓝色画刷
 	m_brushBlue.CreateSolidBrush(RGB(0, 0, 255));
 	// 设置窗体全屏显示
@@ -89,6 +161,11 @@ BOOL CStartDebate::OnInitDialog()
 	wp.rcNormalPosition = newPos; //新位置
 	wp.showCmd = SW_SHOWNORMAL;//正常显示
 	::SetWindowPlacement(this->m_hWnd, &wp); //设置窗体位置
+	// 设置文本框字体大小
+	SetStaticCtlFontSize(m_stcTitle, 6);
+	// 初始化项目
+	m_nItemNum = 0;
+	ResetItem();
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // EXCEPTION: OCX Property Pages should return FALSE
 }
@@ -102,37 +179,80 @@ void CStartDebate::OnBnClickedBtnExit()
 // 开始计时按钮事件响应
 void CStartDebate::OnBnClickedBtnStart()
 {
-	// TODO: Add your control notification handler code here
+	SetTimer(1, 1000, NULL);
+	BOOL bEnable = FALSE;
+	if (g_drAllRules[m_nItemNum].m_nTimerNum > 1)
+	{
+		// 如果有两个时钟的话
+		m_btnStart.SetWindowTextW(_T("切换时钟"));
+		if(!m_bIsStop && !m_bStartFirst)
+			m_bActiveFirst = !m_bActiveFirst;
+		bEnable = TRUE;
+	}
+	m_bIsStop = false;
+	m_bStartFirst = false;
+	m_btnStart.EnableWindow(bEnable);
+	m_btnStop.EnableWindow(TRUE);
 }
 
 // 暂停计时按钮事件响应
 void CStartDebate::OnBnClickedBtnStop()
 {
-	// TODO: Add your control notification handler code here
+	KillTimer(1);
+	if(g_drAllRules[m_nItemNum].m_nTimerNum > 1)
+		m_btnStart.SetWindowTextW(_T("开始计时"));
+	m_bIsStop = true;
+	m_btnStart.EnableWindow(TRUE);
+	m_btnStop.EnableWindow(FALSE);
 }
 
 // 重置本节按钮事件响应
 void CStartDebate::OnBnClickedBtnResetThis()
 {
-	// TODO: Add your control notification handler code here
+	if (IDYES == MessageBoxW(_T("确定要重置本节?"), 0, MB_YESNO | MB_ICONINFORMATION))
+	{
+		KillTimer(1);
+		ResetItem();
+	}
 }
 
 // 重置比赛按钮事件响应
 void CStartDebate::OnBnClickedBtnResetAll()
 {
-	// TODO: Add your control notification handler code here
+	if (IDYES == MessageBoxW(_T("确定要重置比赛?"), 0, MB_YESNO | MB_ICONINFORMATION))
+	{
+		m_nItemNum = 0;
+		KillTimer(1);
+		ResetItem();
+	}
 }
 
 // 上一环节按钮事件响应
 void CStartDebate::OnBnClickedBtnLeft()
 {
-	// TODO: Add your control notification handler code here
+	if (m_nItemNum - 1 >= 0)
+	{
+		m_nItemNum--;
+		ResetItem();
+	}
+	else
+	{
+		MessageBoxW(_T("到头了!"), 0, MB_OK | MB_ICONSTOP);
+	}
 }
 
 // 下一环节按钮事件响应
 void CStartDebate::OnBnClickedBtnRight()
 {
-	// TODO: Add your control notification handler code here
+	if (m_nItemNum + 1 < g_drAllRules.size())
+	{
+		m_nItemNum++;
+		ResetItem();
+	}
+	else
+	{
+		MessageBoxW(_T("到头了!"), 0, MB_OK | MB_ICONSTOP);
+	}
 }
 
 // 环节列表按钮事件响应
@@ -146,14 +266,12 @@ void CStartDebate::OnTimer(UINT_PTR nIDEvent)
 {
 	if (nIDEvent == 1)
 	{
-		// 遍历四个时间计数器
-		for (int i = 0; i < 4; i++)
-		{
-			if (m_alTimer[i] > 0)
-			{
-				m_alTimer[i] -= 1;
-			}
-		}
+		int * ptrChange{ m_bActiveFirst ? &m_aTimer[0] : &m_aTimer[1] };
+		if (*ptrChange > 0)
+			*ptrChange -= 1;
+		else
+			KillTimer(1);
+		PrintTimer();
 	}
 	CDialogEx::OnTimer(nIDEvent);
 }
@@ -180,7 +298,8 @@ void CStartDebate::OnSize(UINT nType, int cx, int cy)
 	m_btnExit.MoveWindow(CRect{ x0 + int(4.2*btnWidth),y0 + int(1.4*btnHeight),int(x0 + 5.2*btnWidth) ,y0 + int(2.4*btnHeight) });
 	// 移动文本框到指定位置
 	m_stcTitle.MoveWindow(CRect{ 0,0,cx,int(0.08*cy) });
-	m_stcShowTime.MoveWindow(CRect{ 0,int(0.08*cy) ,cx,int(0.75*cy) });
+	m_stcShowTime.MoveWindow(CRect{ int(0.15*cx),int(0.08*cy) ,cx,int(0.75*cy) });
+	m_stcTimerName.MoveWindow(CRect{ 0,int(0.35*cy) ,int(0.15*cx) ,int(0.75*cy) });
 }
 
 
@@ -198,7 +317,10 @@ HBRUSH CStartDebate::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 {
 	HBRUSH hbr = CDialogEx::OnCtlColor(pDC, pWnd, nCtlColor);
 	// 设置文本框背景及文字颜色
-	if (nCtlColor == CTLCOLOR_STATIC && (pWnd->GetDlgCtrlID() == IDC_STC_TITLE || pWnd->GetDlgCtrlID() == IDC_STC_SHOWTIME))
+	if (nCtlColor == CTLCOLOR_STATIC && 
+		(pWnd->GetDlgCtrlID() == IDC_STC_TITLE || 
+			pWnd->GetDlgCtrlID() == IDC_STC_SHOWTIME ||
+			pWnd->GetDlgCtrlID() == IDC_STC_TIMERNAME))
 	{
 		pDC->SetTextColor(RGB(255, 255, 255));
 		pDC->SetBkColor(RGB(0, 0, 255));
