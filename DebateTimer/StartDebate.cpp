@@ -53,6 +53,7 @@ BEGIN_MESSAGE_MAP(CStartDebate, CDialogEx)
 	ON_WM_SIZE()
 	ON_WM_PAINT()
 	ON_WM_CTLCOLOR()
+	ON_NOTIFY(NM_DBLCLK, IDC_LIST_SHOWRULELIST, &CStartDebate::OnDblclkListShowrulelist)
 END_MESSAGE_MAP()
 
 
@@ -121,6 +122,8 @@ void CStartDebate::ResetItem()
 	m_bIsStop = false;
 	m_btnStart.EnableWindow(TRUE);
 	m_btnStop.EnableWindow(FALSE);
+	m_listRule.ShowWindow(SW_HIDE);
+	m_btnShowList.SetWindowTextW(_T("显示列表"));
 	ResetTimer();
 	PrintTitle();
 	PrintTimerName();
@@ -170,10 +173,10 @@ BOOL CStartDebate::OnInitDialog()
 	// 初始化列表框
 	m_listRule.SetExtendedStyle(m_listRule.GetExtendedStyle() | LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 	m_listRule.InsertColumn(0, _T("序号"), LVCFMT_CENTER, 60, 50);
-	m_listRule.InsertColumn(1, _T("项目名称"), LVCFMT_CENTER, 150, 50);
-	m_listRule.InsertColumn(2, _T("时钟时间"), LVCFMT_CENTER, 150, 50);
-	m_listRule.InsertColumn(3, _T("时钟1说明"), LVCFMT_CENTER, 120, 50);
-	m_listRule.InsertColumn(4, _T("时钟2说明"), LVCFMT_CENTER, 120, 50);
+	m_listRule.InsertColumn(1, _T("项目名称"), LVCFMT_CENTER, 250, 50);
+	m_listRule.InsertColumn(2, _T("时钟时间"), LVCFMT_CENTER, 100, 50);
+	m_listRule.InsertColumn(3, _T("时钟1说明"), LVCFMT_CENTER, 100, 50);
+	m_listRule.InsertColumn(4, _T("时钟2说明"), LVCFMT_CENTER, 100, 50);
 	// 此处的列表为只读,不可修改其中内容,故在此处一遍初始化
 	CString tmp;
 	for (int i = 0; i < g_drAllRules.size(); i++)
@@ -291,6 +294,7 @@ void CStartDebate::OnBnClickedBtnShowlist()
 {
 	OnBnClickedBtnStop();		// 显示列表的时候暂停计时
 	m_listRule.ShowWindow(m_listRule.IsWindowVisible() ? SW_HIDE : SW_SHOW);
+	m_listRule.SetFocus();
 	m_btnShowList.SetWindowTextW(m_listRule.IsWindowVisible() ? _T("隐藏列表") : _T("显示列表"));
 }
 
@@ -362,4 +366,19 @@ HBRUSH CStartDebate::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 		return m_brushBlue;
 	}
 	return hbr;
+}
+
+// 双击列表框事件响应
+void CStartDebate::OnDblclkListShowrulelist(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
+	NM_LISTVIEW * pNMListView = reinterpret_cast<NM_LISTVIEW*>(pNMHDR);
+	int nLine{ pNMListView->iItem };	// 获取选中行信息
+	POSITION pos = m_listRule.GetFirstSelectedItemPosition();
+	if (m_listRule.GetNextSelectedItem(pos) == -1)
+		return;		//如果没有选中的项目，返回
+	// 获取此行的项目id,然后载入
+	m_nItemNum = _ttoi(CString{ m_listRule.GetItemText(nLine,0) }) - 1;
+	ResetItem();
+	*pResult = 0;
 }
