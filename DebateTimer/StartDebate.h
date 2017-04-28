@@ -1,5 +1,6 @@
 #pragma once
 #include "afxwin.h"
+#include "afxcmn.h"
 
 
 // CStartDebate dialog
@@ -40,7 +41,8 @@ private:
 	CStatic m_stcShowTime;		// 计数器显示框
 	CStatic m_stcTimerName;	// 计数器名称框
 	CBrush m_brushBlue;		// 蓝色画刷
-	CFont m_font;
+	CFont m_font;				// 字体
+	CListCtrl m_listRule;		// 规则列表框
 
 
 	// 设置静态文本框的字体大小

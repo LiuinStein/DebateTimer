@@ -36,6 +36,7 @@ void CStartDebate::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_STC_TITLE, m_stcTitle);
 	DDX_Control(pDX, IDC_STC_SHOWTIME, m_stcShowTime);
 	DDX_Control(pDX, IDC_STC_TIMERNAME, m_stcTimerName);
+	DDX_Control(pDX, IDC_LIST_SHOWRULELIST, m_listRule);
 }
 
 
@@ -166,6 +167,34 @@ BOOL CStartDebate::OnInitDialog()
 	// 初始化项目
 	m_nItemNum = 0;
 	ResetItem();
+	// 初始化列表框
+	m_listRule.SetExtendedStyle(m_listRule.GetExtendedStyle() | LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
+	m_listRule.InsertColumn(0, _T("序号"), LVCFMT_CENTER, 60, 50);
+	m_listRule.InsertColumn(1, _T("项目名称"), LVCFMT_CENTER, 150, 50);
+	m_listRule.InsertColumn(2, _T("时钟时间"), LVCFMT_CENTER, 150, 50);
+	m_listRule.InsertColumn(3, _T("时钟1说明"), LVCFMT_CENTER, 120, 50);
+	m_listRule.InsertColumn(4, _T("时钟2说明"), LVCFMT_CENTER, 120, 50);
+	// 此处的列表为只读,不可修改其中内容,故在此处一遍初始化
+	CString tmp;
+	for (int i = 0; i < g_drAllRules.size(); i++)
+	{
+		// 编号
+		tmp.Format(_T("%d"), i + 1);
+		m_listRule.InsertItem(i, tmp);
+		// 项目名称
+		tmp = g_drAllRules[i].m_strChapter.c_str();
+		m_listRule.SetItemText(i, 1, tmp);
+		// 时钟时间
+		tmp.Format(_T("%d分%d秒"), g_drAllRules[i].m_nTime / 60,
+			g_drAllRules[i].m_nTime - int(g_drAllRules[i].m_nTime / 60) * 60);
+		m_listRule.SetItemText(i, 2, tmp);
+		// 时钟说明
+		for (int j = 0; j < g_drAllRules[i].m_nTimerNum && j < g_drAllRules[i].m_vecTimerName.size(); j++)
+		{
+			tmp = g_drAllRules[i].m_vecTimerName[j].c_str();
+			m_listRule.SetItemText(i, 3 + j, tmp);
+		}
+	}
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // EXCEPTION: OCX Property Pages should return FALSE
 }
@@ -193,6 +222,8 @@ void CStartDebate::OnBnClickedBtnStart()
 	m_bStartFirst = false;
 	m_btnStart.EnableWindow(bEnable);
 	m_btnStop.EnableWindow(TRUE);
+	m_listRule.ShowWindow(SW_HIDE);
+	m_btnShowList.SetWindowTextW(_T("显示列表"));
 }
 
 // 暂停计时按钮事件响应
@@ -258,7 +289,9 @@ void CStartDebate::OnBnClickedBtnRight()
 // 环节列表按钮事件响应
 void CStartDebate::OnBnClickedBtnShowlist()
 {
-	// TODO: Add your control notification handler code here
+	OnBnClickedBtnStop();		// 显示列表的时候暂停计时
+	m_listRule.ShowWindow(m_listRule.IsWindowVisible() ? SW_HIDE : SW_SHOW);
+	m_btnShowList.SetWindowTextW(m_listRule.IsWindowVisible() ? _T("隐藏列表") : _T("显示列表"));
 }
 
 // 计时器回调函数
@@ -300,6 +333,8 @@ void CStartDebate::OnSize(UINT nType, int cx, int cy)
 	m_stcTitle.MoveWindow(CRect{ 0,0,cx,int(0.08*cy) });
 	m_stcShowTime.MoveWindow(CRect{ int(0.15*cx),int(0.08*cy) ,cx,int(0.75*cy) });
 	m_stcTimerName.MoveWindow(CRect{ 0,int(0.35*cy) ,int(0.15*cx) ,int(0.75*cy) });
+	// 移动列表到指定位置
+	m_listRule.MoveWindow(CRect{ int(0.3*cx),int(0.08*cy) ,int(0.65*cx),int(0.75*cy) });
 }
 
 
