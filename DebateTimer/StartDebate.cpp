@@ -59,13 +59,13 @@ END_MESSAGE_MAP()
 
 // CStartDebate message handlers
 
-// 设置静态文本框的字体大小,设置为6大约可填充完整一个static框
-void CStartDebate::SetStaticCtlFontSize(CStatic & __s, double __nps)
+// 设置控件的字体及大小
+void CStartDebate::SetControlFont(CWnd& __wnd, double __nps, const char* __font)
 {
-	CRect stcRect;
-	__s.GetClientRect(stcRect);
-	m_font.CreatePointFont(__nps*stcRect.Height(), _T("Microsoft Sans Serif"));
-	__s.SetFont(&m_font);
+	CRect rect;
+	__wnd.GetClientRect(rect);
+	m_font.CreatePointFont(__nps*rect.Height(), CString{ __font });
+	__wnd.SetFont(&m_font);
 }
 
 // 打印项目标题
@@ -86,7 +86,7 @@ void CStartDebate::PrintTimerName()
 		output += tmp;
 	}
 	m_stcTimerName.SetWindowTextW(output);
-	SetStaticCtlFontSize(m_stcTimerName, 1.5);
+	SetControlFont(m_stcTimerName, 1.5);
 }
 
 // 重置时钟
@@ -110,7 +110,7 @@ void CStartDebate::PrintTimer()
 		output += tmp;
 	}
 	m_stcShowTime.SetWindowTextW(output);
-	SetStaticCtlFontSize(m_stcShowTime, 5.5 / nLineNum);
+	SetControlFont(m_stcShowTime, 5.5 / nLineNum);
 }
 
 // 重置本节
@@ -166,7 +166,7 @@ BOOL CStartDebate::OnInitDialog()
 	wp.showCmd = SW_SHOWNORMAL;//正常显示
 	::SetWindowPlacement(this->m_hWnd, &wp); //设置窗体位置
 	// 设置文本框字体大小
-	SetStaticCtlFontSize(m_stcTitle, 6);
+	SetControlFont(m_stcTitle, 6);
 	// 初始化项目
 	m_nItemNum = 0;
 	ResetItem();
@@ -356,10 +356,9 @@ HBRUSH CStartDebate::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 {
 	HBRUSH hbr = CDialogEx::OnCtlColor(pDC, pWnd, nCtlColor);
 	// 设置文本框背景及文字颜色
-	if (nCtlColor == CTLCOLOR_STATIC && 
-		(pWnd->GetDlgCtrlID() == IDC_STC_TITLE || 
-			pWnd->GetDlgCtrlID() == IDC_STC_SHOWTIME ||
-			pWnd->GetDlgCtrlID() == IDC_STC_TIMERNAME))
+	if (pWnd->GetDlgCtrlID() == IDC_STC_TITLE || 
+		pWnd->GetDlgCtrlID() == IDC_STC_SHOWTIME ||
+		pWnd->GetDlgCtrlID() == IDC_STC_TIMERNAME)
 	{
 		pDC->SetTextColor(RGB(255, 255, 255));
 		pDC->SetBkColor(RGB(0, 0, 255));

@@ -45,8 +45,8 @@ private:
 	CListCtrl m_listRule;		// 规则列表框
 
 
-	// 设置静态文本框的字体大小
-	void SetStaticCtlFontSize(CStatic & __s, double __nps);
+	// 设置控件的字体及大小
+	void SetControlFont(CWnd & __wnd, double __nps, const char * __font = "Microsoft Sans Serif");
 	// 打印项目标题
 	void PrintTitle();
 	// 打印计数器名称

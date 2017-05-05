@@ -55,7 +55,10 @@ public:
 	void OnMoveLine(int __m);
 	void OnInsertLine(int __m);
 	afx_msg void OnBnClickedBtnSave();
+
+public:
 	afx_msg void OnBnClickedBtnImport();
+public:
 	afx_msg void OnBnClickedBtnSaveas();
 	afx_msg void OnBnClickedBtnSetdefault();
 	afx_msg void OnBnClickedBtnApply();
