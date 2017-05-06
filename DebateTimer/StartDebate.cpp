@@ -82,7 +82,7 @@ void CStartDebate::PrintTimerName()
 	CString tmp;
 	for (int i = 0; i < rule.m_nTimerNum; i++)
 	{
-		tmp.Format(_T("%s:\r\n"), CString{rule.m_vecTimerName[i].c_str()}.GetString());
+		tmp.Format(_T("%s\r\n"), CString{rule.m_vecTimerName[i].c_str()}.GetString());
 		output += tmp;
 	}
 	m_stcTimerName.SetWindowTextW(output);
@@ -106,7 +106,7 @@ void CStartDebate::PrintTimer()
 	CString tmp;
 	for (int i = 0; i < rule.m_nTimerNum; i++)
 	{
-		tmp.Format(_T("%2d:%2d\r\n"), m_aTimer[i] / 60, m_aTimer[i] - 60 * int(m_aTimer[i] / 60));
+		tmp.Format(_T("%2d:%02d\r\n"), m_aTimer[i] / 60, m_aTimer[i] - 60 * int(m_aTimer[i] / 60));
 		output += tmp;
 	}
 	m_stcShowTime.SetWindowTextW(output);
@@ -356,12 +356,21 @@ HBRUSH CStartDebate::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 {
 	HBRUSH hbr = CDialogEx::OnCtlColor(pDC, pWnd, nCtlColor);
 	// 设置文本框背景及文字颜色
+	pDC->SetBkColor(RGB(0, 0, 255));
 	if (pWnd->GetDlgCtrlID() == IDC_STC_TITLE || 
-		pWnd->GetDlgCtrlID() == IDC_STC_SHOWTIME ||
 		pWnd->GetDlgCtrlID() == IDC_STC_TIMERNAME)
 	{
 		pDC->SetTextColor(RGB(255, 255, 255));
-		pDC->SetBkColor(RGB(0, 0, 255));
+		return m_brushBlue;
+	}
+	if(pWnd->GetDlgCtrlID() == IDC_STC_SHOWTIME)
+	{
+		// 显示时间单独处理
+		auto colorText{ RGB(255, 255, 255) };		// 默认是白色
+		int * ptrChange{ m_bActiveFirst ? &m_aTimer[0] : &m_aTimer[1] };
+		if (*ptrChange <= 30)
+			colorText = RGB(255, 0, 0);
+		pDC->SetTextColor(colorText);
 		return m_brushBlue;
 	}
 	return hbr;
