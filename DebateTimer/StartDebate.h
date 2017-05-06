@@ -57,6 +57,8 @@ private:
 	void PrintTimer();
 	// 重置本节
 	void ResetItem();
+	// 播放声音
+	void PlaySoundFromFile(const char * __file);
 
 public:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);

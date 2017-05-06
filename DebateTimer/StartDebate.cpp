@@ -6,6 +6,7 @@
 #include "StartDebate.h"
 #include "afxdialogex.h"
 #include "Core.h"
+#include "Vfw.h"
 
 
 // CStartDebate dialog
@@ -128,6 +129,16 @@ void CStartDebate::ResetItem()
 	PrintTitle();
 	PrintTimerName();
 	PrintTimer();
+}
+
+// 播放文件中音频
+void CStartDebate::PlaySoundFromFile(const char* __file)
+{
+	USES_CONVERSION;
+	MCIWndPlay(MCIWndCreate(GetSafeHwnd(),
+		AfxGetInstanceHandle(),
+		WS_CHILD | MCIWNDF_NOMENU | MCIWNDF_NOTIFYMODE,
+		A2W(__file)));
 }
 
 BOOL CStartDebate::PreTranslateMessage(MSG* pMsg)
@@ -304,10 +315,11 @@ void CStartDebate::OnTimer(UINT_PTR nIDEvent)
 	if (nIDEvent == 1)
 	{
 		int * ptrChange{ m_bActiveFirst ? &m_aTimer[0] : &m_aTimer[1] };
-		if (*ptrChange > 0)
-			*ptrChange -= 1;
-		else
-			KillTimer(1);
+		*ptrChange > 0 ? *ptrChange -= 1 : KillTimer(1);
+		if (*ptrChange == 30)
+			PlaySoundFromFile("l30s.mp3");
+		else if (*ptrChange == 0)
+			PlaySoundFromFile("l1s.mp3");
 		PrintTimer();
 	}
 	CDialogEx::OnTimer(nIDEvent);
