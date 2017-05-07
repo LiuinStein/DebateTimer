@@ -39,6 +39,7 @@ private:
 	CButton m_btnExit;			// 退出按钮
 	CStatic m_stcTitle;		// 环节标题框
 	CStatic m_stcShowTime;		// 计数器显示框
+	CStatic m_stcShowTime2;
 	CStatic m_stcTimerName;	// 计数器名称框
 	CBrush m_brushBlue;		// 蓝色画刷
 	CFont m_font;				// 字体
@@ -53,6 +54,8 @@ private:
 	void PrintTimerName();
 	// 重置时钟
 	void ResetTimer();
+	// 设置时钟静态框显示模式
+	void SetTimerShowMode();
 	// 打印时钟信息
 	void PrintTimer();
 	// 重置本节
@@ -76,4 +79,5 @@ public:
 	afx_msg void OnPaint();
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg void OnDblclkListShowrulelist(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 };

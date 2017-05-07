@@ -38,6 +38,7 @@ void CStartDebate::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_STC_SHOWTIME, m_stcShowTime);
 	DDX_Control(pDX, IDC_STC_TIMERNAME, m_stcTimerName);
 	DDX_Control(pDX, IDC_LIST_SHOWRULELIST, m_listRule);
+	DDX_Control(pDX, IDC_STC_SHOWTIMER2, m_stcShowTime2);
 }
 
 
@@ -55,6 +56,7 @@ BEGIN_MESSAGE_MAP(CStartDebate, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_CTLCOLOR()
 	ON_NOTIFY(NM_DBLCLK, IDC_LIST_SHOWRULELIST, &CStartDebate::OnDblclkListShowrulelist)
+	ON_WM_ERASEBKGND()
 END_MESSAGE_MAP()
 
 
@@ -98,24 +100,45 @@ void CStartDebate::ResetTimer()
 		g_drAllRules[m_nItemNum].m_nTime : -1;
 }
 
+// 设置时钟静态框显示模式
+void CStartDebate::SetTimerShowMode()
+{
+	// 显示屏大小
+	int cx{ GetSystemMetrics(SM_CXSCREEN) };
+	int cy{ GetSystemMetrics(SM_CYSCREEN) };
+	if(g_drAllRules[m_nItemNum].m_nTimerNum == 1)
+	{
+		m_stcShowTime.MoveWindow(CRect{ int(0.15*cx),int(0.08*cy) ,cx,int(0.75*cy) });
+		m_stcShowTime2.ShowWindow(SW_HIDE);
+	}
+	else
+	{
+		m_stcShowTime.MoveWindow(CRect{ int(0.15*cx),int(0.08*cy) ,cx,int(0.415*cy) });
+		m_stcShowTime2.MoveWindow(CRect{ int(0.15*cx),int(0.415*cy)+20 ,cx,int(0.75*cy) });
+		m_stcShowTime2.ShowWindow(SW_SHOW);
+	}
+
+}
+
 // 在静态框中打印时钟信息
 void CStartDebate::PrintTimer()
 {
 	const SRule & rule{ g_drAllRules[m_nItemNum] };
-	const unsigned nLineNum{ rule.m_nTimerNum };	// 需要打印的行数
 	CString output;
-	CString tmp;
-	for (int i = 0; i < rule.m_nTimerNum; i++)
-	{
-		tmp.Format(_T("%2d:%02d\r\n"), m_aTimer[i] / 60, m_aTimer[i] - 60 * int(m_aTimer[i] / 60));
-		output += tmp;
-	}
+	output.Format(_T("%2d:%02d"), m_aTimer[0] / 60, m_aTimer[0] - 60 * int(m_aTimer[0] / 60));
 	m_stcShowTime.SetWindowTextW(output);
+	if (rule.m_nTimerNum > 1)
+	{
+		output.Format(_T("%2d:%02d"), m_aTimer[1] / 60, m_aTimer[1] - 60 * int(m_aTimer[1] / 60));
+		m_stcShowTime2.SetWindowTextW(output);
+	}
 	// 变更一下字体的刷新机制,没有切换到下一张就没必要反复设置字体
 	static int nPage{ -1 };
 	if(nPage != m_nItemNum)
 	{
-		SetControlFont(m_stcShowTime, 5.5 / nLineNum);
+		SetTimerShowMode();
+		SetControlFont(m_stcShowTime, 6 / rule.m_nTimerNum);
+		SetControlFont(m_stcShowTime2, 6 / rule.m_nTimerNum);
 		nPage = m_nItemNum;
 	}
 }
@@ -353,7 +376,6 @@ void CStartDebate::OnSize(UINT nType, int cx, int cy)
 	m_btnExit.MoveWindow(CRect{ x0 + int(4.2*btnWidth),y0 + int(1.4*btnHeight),int(x0 + 5.2*btnWidth) ,y0 + int(2.4*btnHeight) });
 	// 移动文本框到指定位置
 	m_stcTitle.MoveWindow(CRect{ 0,0,cx,int(0.08*cy) });
-	m_stcShowTime.MoveWindow(CRect{ int(0.15*cx),int(0.08*cy) ,cx,int(0.75*cy) });
 	m_stcTimerName.MoveWindow(CRect{ 0,int(0.35*cy) ,int(0.15*cx) ,int(0.75*cy) });
 	// 移动列表到指定位置
 	m_listRule.MoveWindow(CRect{ int(0.3*cx),int(0.08*cy) ,int(0.65*cx),int(0.75*cy) });
@@ -381,7 +403,8 @@ HBRUSH CStartDebate::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 		pDC->SetTextColor(RGB(255, 255, 255));
 		return m_brushBlue;
 	}
-	if(pWnd->GetDlgCtrlID() == IDC_STC_SHOWTIME)
+	if(pWnd->GetDlgCtrlID() == IDC_STC_SHOWTIME ||
+		pWnd->GetDlgCtrlID() == IDC_STC_SHOWTIMER2)
 	{
 		// 显示时间单独处理
 		auto colorText{ RGB(255, 255, 255) };		// 默认是白色
@@ -407,4 +430,10 @@ void CStartDebate::OnDblclkListShowrulelist(NMHDR *pNMHDR, LRESULT *pResult)
 	m_nItemNum = _ttoi(CString{ m_listRule.GetItemText(nLine,0) }) - 1;
 	ResetItem();
 	*pResult = 0;
+}
+
+
+BOOL CStartDebate::OnEraseBkgnd(CDC* pDC)
+{
+	return TRUE;
 }
