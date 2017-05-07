@@ -102,7 +102,7 @@ void CStartDebate::ResetTimer()
 void CStartDebate::PrintTimer()
 {
 	const SRule & rule{ g_drAllRules[m_nItemNum] };
-	const unsigned nLineNum{ rule.m_nTimerNum / 2 + 1 };	// 需要打印的行数
+	const unsigned nLineNum{ rule.m_nTimerNum };	// 需要打印的行数
 	CString output;
 	CString tmp;
 	for (int i = 0; i < rule.m_nTimerNum; i++)
@@ -111,7 +111,13 @@ void CStartDebate::PrintTimer()
 		output += tmp;
 	}
 	m_stcShowTime.SetWindowTextW(output);
-	SetControlFont(m_stcShowTime, 5.5 / nLineNum);
+	// 变更一下字体的刷新机制,没有切换到下一张就没必要反复设置字体
+	static int nPage{ -1 };
+	if(nPage != m_nItemNum)
+	{
+		SetControlFont(m_stcShowTime, 5.5 / nLineNum);
+		nPage = m_nItemNum;
+	}
 }
 
 // 重置本节
