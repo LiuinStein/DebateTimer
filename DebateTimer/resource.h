@@ -34,6 +34,7 @@
 #define IDC_STC_SHOWTIME                1025
 #define IDC_STC_TIMERNAME               1026
 #define IDC_LIST_SHOWRULELIST           1027
+#define IDC_STC_SHOWTIME2               1028
 #define ID_32771                        32771
 #define ID_32772                        32772
 #define ID_32773                        32773

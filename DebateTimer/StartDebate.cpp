@@ -376,16 +376,14 @@ void CStartDebate::OnSize(UINT nType, int cx, int cy)
 	const int btnWidth{ rectBtn.Width() };
 	const int btnHeight{ rectBtn.Height() };
 	// 左上角按钮的左上角坐标
-	const int x0{ int((cx - btnWidth*5.2) / 2) };						// 居中显示,中间间隔0.4倍按钮长度
-	const int y0{ int(cy - int(0.06*double(cy)) - 2.3*btnHeight) };	// 底部留出5%的空间来
+	const int x0{ int((cx - btnWidth*8) / 2) };	// 居中显示,中间间隔0.4倍按钮长度
+	const int y0{ int(0.95*cy - btnHeight) };		// 底部留出5%的空间来
 	m_btnStart.MoveWindow(CRect{ x0,y0,x0 + btnWidth,y0 + btnHeight });
 	m_btnStop.MoveWindow(CRect{ x0 + int(1.4*btnWidth),y0,int(x0 + 2.4*btnWidth),y0 + btnHeight });
 	m_btnResetThis.MoveWindow(CRect{ x0 + int(2.8*btnWidth),y0,int(x0 + 3.8*btnWidth),y0 + btnHeight });
-	m_btnResetAll.MoveWindow(CRect{ x0 + int(4.2*btnWidth),y0,int(x0 + 5.2*btnWidth),y0 + btnHeight });
-	m_btnLeft.MoveWindow(CRect{ x0,y0 + int(1.4*btnHeight),x0 + btnWidth ,y0 + int(2.4*btnHeight) });
-	m_btnRight.MoveWindow(CRect{ x0 + int(1.4*btnWidth),y0 + int(1.4*btnHeight),int(x0 + 2.4*btnWidth) ,y0 + int(2.4*btnHeight) });
-	m_btnShowList.MoveWindow(CRect{ x0 + int(2.8*btnWidth),y0 + int(1.4*btnHeight),int(x0 + 3.8*btnWidth) ,y0 + int(2.4*btnHeight) });
-	m_btnExit.MoveWindow(CRect{ x0 + int(4.2*btnWidth),y0 + int(1.4*btnHeight),int(x0 + 5.2*btnWidth) ,y0 + int(2.4*btnHeight) });
+	m_btnRight.MoveWindow(CRect{ x0 + int(4.2*btnWidth),y0,int(x0 + 5.2*btnWidth) ,y0 + btnHeight });
+	m_btnShowList.MoveWindow(CRect{ x0 + int(5.6*btnWidth),y0,int(x0 + 6.6*btnWidth) ,y0 + btnHeight });
+	m_btnExit.MoveWindow(CRect{ x0 + int(7*btnWidth),y0,int(x0 + 8*btnWidth) ,y0 + btnHeight });
 	// 移动文本框到指定位置
 	m_stcTitle.MoveWindow(CRect{ 0,0,cx,int(0.08*cy) });
 	m_stcTimerName.MoveWindow(CRect{ 0,int(0.35*cy) ,int(0.15*cx) ,int(0.75*cy) });
