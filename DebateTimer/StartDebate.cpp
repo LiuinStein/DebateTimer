@@ -5,6 +5,7 @@
 #include "DebateTimer.h"
 #include "StartDebate.h"
 #include "afxdialogex.h"
+#include "Resource.h"
 #include "Core.h"
 #include "Vfw.h"
 
@@ -38,7 +39,7 @@ void CStartDebate::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_STC_SHOWTIME, m_stcShowTime);
 	DDX_Control(pDX, IDC_STC_TIMERNAME, m_stcTimerName);
 	DDX_Control(pDX, IDC_LIST_SHOWRULELIST, m_listRule);
-	DDX_Control(pDX, IDC_STC_SHOWTIMER2, m_stcShowTime2);
+	DDX_Control(pDX, IDC_STC_SHOWTIME2, m_stcShowTime2);
 }
 
 
@@ -56,7 +57,6 @@ BEGIN_MESSAGE_MAP(CStartDebate, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_CTLCOLOR()
 	ON_NOTIFY(NM_DBLCLK, IDC_LIST_SHOWRULELIST, &CStartDebate::OnDblclkListShowrulelist)
-	ON_WM_ERASEBKGND()
 END_MESSAGE_MAP()
 
 
@@ -69,6 +69,25 @@ void CStartDebate::SetControlFont(CWnd& __wnd, double __nps, const char* __font)
 	__wnd.GetClientRect(rect);
 	m_font.CreatePointFont(__nps*rect.Height(), CString{ __font });
 	__wnd.SetFont(&m_font);
+}
+
+// 设置时钟静态框显示模式
+void CStartDebate::SetTimerShowMode()
+{
+	// 显示屏大小
+	int cx{ GetSystemMetrics(SM_CXSCREEN) };
+	int cy{ GetSystemMetrics(SM_CYSCREEN) };
+	if (g_drAllRules[m_nItemNum].m_nTimerNum == 1)
+	{
+		m_stcShowTime.MoveWindow(CRect{ int(0.15*cx),int(0.08*cy) ,cx,int(0.75*cy) });
+		m_stcShowTime2.ShowWindow(SW_HIDE);
+	}
+	else
+	{
+		m_stcShowTime.MoveWindow(CRect{ int(0.15*cx),int(0.08*cy) ,cx,int(0.415*cy) });
+		m_stcShowTime2.MoveWindow(CRect{ int(0.15*cx),int(0.415*cy) + 20 ,cx,int(0.75*cy) });
+		m_stcShowTime2.ShowWindow(SW_SHOW);
+	}
 }
 
 // 打印项目标题
@@ -100,45 +119,32 @@ void CStartDebate::ResetTimer()
 		g_drAllRules[m_nItemNum].m_nTime : -1;
 }
 
-// 设置时钟静态框显示模式
-void CStartDebate::SetTimerShowMode()
-{
-	// 显示屏大小
-	int cx{ GetSystemMetrics(SM_CXSCREEN) };
-	int cy{ GetSystemMetrics(SM_CYSCREEN) };
-	if(g_drAllRules[m_nItemNum].m_nTimerNum == 1)
-	{
-		m_stcShowTime.MoveWindow(CRect{ int(0.15*cx),int(0.08*cy) ,cx,int(0.75*cy) });
-		m_stcShowTime2.ShowWindow(SW_HIDE);
-	}
-	else
-	{
-		m_stcShowTime.MoveWindow(CRect{ int(0.15*cx),int(0.08*cy) ,cx,int(0.415*cy) });
-		m_stcShowTime2.MoveWindow(CRect{ int(0.15*cx),int(0.415*cy)+20 ,cx,int(0.75*cy) });
-		m_stcShowTime2.ShowWindow(SW_SHOW);
-	}
-
-}
-
 // 在静态框中打印时钟信息
 void CStartDebate::PrintTimer()
 {
 	const SRule & rule{ g_drAllRules[m_nItemNum] };
 	CString output;
-	output.Format(_T("%2d:%02d"), m_aTimer[0] / 60, m_aTimer[0] - 60 * int(m_aTimer[0] / 60));
-	m_stcShowTime.SetWindowTextW(output);
+	output.Format(_T("%2d:%02d\r\n"), m_aTimer[0] / 60, m_aTimer[0] - 60 * int(m_aTimer[0] / 60));
+	if (m_aTimer[0] <= 30)
+		m_stcShowTime.SetTextColor(RGB(255, 0, 0));
+	m_stcShowTime.SetWindowText(output);
 	if (rule.m_nTimerNum > 1)
 	{
 		output.Format(_T("%2d:%02d"), m_aTimer[1] / 60, m_aTimer[1] - 60 * int(m_aTimer[1] / 60));
-		m_stcShowTime2.SetWindowTextW(output);
+		if (m_aTimer[1] <= 30)
+			m_stcShowTime2.SetTextColor(RGB(255, 0, 0));
+		m_stcShowTime2.SetWindowText(output);
 	}
 	// 变更一下字体的刷新机制,没有切换到下一张就没必要反复设置字体
 	static int nPage{ -1 };
 	if(nPage != m_nItemNum)
 	{
+		CRect rect;
 		SetTimerShowMode();
-		SetControlFont(m_stcShowTime, 6 / rule.m_nTimerNum);
-		SetControlFont(m_stcShowTime2, 6 / rule.m_nTimerNum);
+		m_stcShowTime.GetClientRect(rect);
+		m_font.CreatePointFont(6*rect.Height(), CString{ "Microsoft Sans Serif" });
+		m_stcShowTime.SetFont(&m_font);
+		m_stcShowTime2.SetFont(&m_font);
 		nPage = m_nItemNum;
 	}
 }
@@ -150,10 +156,13 @@ void CStartDebate::ResetItem()
 	m_bActiveFirst = true;
 	m_bStartFirst = true;
 	m_bIsStop = false;
+	m_btnStart.SetWindowTextW(_T("开始计时"));
 	m_btnStart.EnableWindow(TRUE);
 	m_btnStop.EnableWindow(FALSE);
 	m_listRule.ShowWindow(SW_HIDE);
 	m_btnShowList.SetWindowTextW(_T("显示列表"));
+	m_stcShowTime.SetTextColor(RGB(255, 255, 255));
+	m_stcShowTime2.SetTextColor(RGB(255, 255, 255));
 	ResetTimer();
 	PrintTitle();
 	PrintTimerName();
@@ -228,7 +237,7 @@ BOOL CStartDebate::OnInitDialog()
 		tmp = g_drAllRules[i].m_strChapter.c_str();
 		m_listRule.SetItemText(i, 1, tmp);
 		// 时钟时间
-		tmp.Format(_T("%d分%d秒"), g_drAllRules[i].m_nTime / 60,
+		tmp.Format(_T("%d分%02d秒"), g_drAllRules[i].m_nTime / 60,
 			g_drAllRules[i].m_nTime - int(g_drAllRules[i].m_nTime / 60) * 60);
 		m_listRule.SetItemText(i, 2, tmp);
 		// 时钟说明
@@ -238,6 +247,9 @@ BOOL CStartDebate::OnInitDialog()
 			m_listRule.SetItemText(i, 3 + j, tmp);
 		}
 	}
+	// 初始化控件
+	m_stcShowTime.SetBkgndColor(RGB(0, 0, 255));
+	m_stcShowTime2.SetBkgndColor(RGB(0, 0, 255));
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // EXCEPTION: OCX Property Pages should return FALSE
 }
@@ -403,17 +415,6 @@ HBRUSH CStartDebate::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 		pDC->SetTextColor(RGB(255, 255, 255));
 		return m_brushBlue;
 	}
-	if(pWnd->GetDlgCtrlID() == IDC_STC_SHOWTIME ||
-		pWnd->GetDlgCtrlID() == IDC_STC_SHOWTIMER2)
-	{
-		// 显示时间单独处理
-		auto colorText{ RGB(255, 255, 255) };		// 默认是白色
-		int * ptrChange{ m_bActiveFirst ? &m_aTimer[0] : &m_aTimer[1] };
-		if (*ptrChange <= 30)
-			colorText = RGB(255, 0, 0);
-		pDC->SetTextColor(colorText);
-		return m_brushBlue;
-	}
 	return hbr;
 }
 
@@ -430,10 +431,4 @@ void CStartDebate::OnDblclkListShowrulelist(NMHDR *pNMHDR, LRESULT *pResult)
 	m_nItemNum = _ttoi(CString{ m_listRule.GetItemText(nLine,0) }) - 1;
 	ResetItem();
 	*pResult = 0;
-}
-
-
-BOOL CStartDebate::OnEraseBkgnd(CDC* pDC)
-{
-	return TRUE;
 }

@@ -192,6 +192,7 @@
     <ClInclude Include="DataStruct.h" />
     <ClInclude Include="DebateTimer.h" />
     <ClInclude Include="DebateTimerDlg.h" />
+    <ClInclude Include="DoubleBuffStatic.h" />
     <ClInclude Include="ParseJson.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="SettingDlg.h" />
@@ -204,6 +205,7 @@
     <ClCompile Include="Core.cpp" />
     <ClCompile Include="DebateTimer.cpp" />
     <ClCompile Include="DebateTimerDlg.cpp" />
+    <ClCompile Include="DoubleBuffStatic.cpp" />
     <ClCompile Include="ParseJson.cpp" />
     <ClCompile Include="SettingDlg.cpp" />
     <ClCompile Include="StartDebate.cpp" />
