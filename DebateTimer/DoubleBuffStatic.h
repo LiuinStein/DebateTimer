@@ -12,6 +12,7 @@ class CDoubleBuffStatic :
 	COLORREF m_colorText;		// 文本颜色
 	COLORREF m_colorBkgnd;		// 控件背景色
 	CFont * m_fontText;		// 控件字体
+	UINT m_fmtText;				// 文字格式, 参照DrawText的DT_
 
 	// 在内存DC中绘图,编译器开了/O2八成会把这个函数给优化掉,MSVC141就是这样的
 	void PaintOnMemDC(CRect __rect, CDC* __mdc);
@@ -22,6 +23,7 @@ public:
 	// 定义新的API覆盖基类中原有的函数，这些函数顾名思义吧
 	void SetWindowText(LPCTSTR __str);
 	void GetWindowText(CString& __str) const;
+	void SetTextFormat(UINT __agn);
 	void SetTextColor(COLORREF __color);
 	void SetBkgndColor(COLORREF __color);
 	void SetFont(CFont * __font);

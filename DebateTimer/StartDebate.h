@@ -57,6 +57,8 @@ private:
 	void PrintTimerName();
 	// 重置时钟
 	void ResetTimer();
+	// 依据编号打印时钟信息
+	void PrintTimer(unsigned __n);
 	// 打印时钟信息
 	void PrintTimer();
 	// 重置本节

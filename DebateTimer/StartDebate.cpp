@@ -67,7 +67,7 @@ void CStartDebate::SetControlFont(CWnd& __wnd, double __nps, const char* __font)
 {
 	CRect rect;
 	__wnd.GetClientRect(rect);
-	m_font.CreatePointFont(__nps*rect.Height(), CString{ __font });
+	m_font.CreatePointFont(__nps*min(rect.Height(), rect.Width()), CString{ __font });
 	__wnd.SetFont(&m_font);
 }
 
@@ -77,17 +77,11 @@ void CStartDebate::SetTimerShowMode()
 	// 显示屏大小
 	int cx{ GetSystemMetrics(SM_CXSCREEN) };
 	int cy{ GetSystemMetrics(SM_CYSCREEN) };
-	if (g_drAllRules[m_nItemNum].m_nTimerNum == 1)
-	{
-		m_stcShowTime.MoveWindow(CRect{ int(0.15*cx),int(0.08*cy) ,cx,int(0.75*cy) });
-		m_stcShowTime2.ShowWindow(SW_HIDE);
-	}
-	else
-	{
-		m_stcShowTime.MoveWindow(CRect{ int(0.15*cx),int(0.08*cy) ,cx,int(0.415*cy) });
-		m_stcShowTime2.MoveWindow(CRect{ int(0.15*cx),int(0.415*cy) + 20 ,cx,int(0.75*cy) });
-		m_stcShowTime2.ShowWindow(SW_SHOW);
-	}
+	auto tn{ g_drAllRules[m_nItemNum].m_nTimerNum };
+	double ky{ 0.75 - 0.335*(tn - 1) };
+	m_stcShowTime.MoveWindow(CRect{ int(0.15*cx),int(0.08*cy) ,cx,int(ky*cy) });
+	m_stcShowTime2.MoveWindow(CRect{ int(0.15*cx),int(ky*cy) + 20 ,cx,int(0.75*cy) });
+	m_stcShowTime2.ShowWindow(tn == 1 ? SW_HIDE : SW_SHOW);
 }
 
 // 打印项目标题
@@ -100,13 +94,9 @@ void CStartDebate::PrintTitle()
 void CStartDebate::PrintTimerName()
 {
 	const SRule & rule{ g_drAllRules[m_nItemNum] };
-	CString output;
-	CString tmp;
-	for (int i = 0; i < rule.m_nTimerNum; i++)
-	{
-		tmp.Format(_T("%s\r\n"), CString{rule.m_vecTimerName[i].c_str()}.GetString());
-		output += tmp;
-	}
+	CString output{ rule.m_vecTimerName[0].c_str() };
+	if (rule.m_nTimerNum > 1)
+		output += ("\r\n" + rule.m_vecTimerName[1]).c_str();
 	m_stcTimerName.SetWindowTextW(output);
 	SetControlFont(m_stcTimerName, 1.5);
 }
@@ -115,26 +105,27 @@ void CStartDebate::PrintTimerName()
 void CStartDebate::ResetTimer()
 {
 	m_aTimer[0] = g_drAllRules[m_nItemNum].m_nTime;
-	m_aTimer[1] = g_drAllRules[m_nItemNum].m_nTimerNum == 2 ? 
-		g_drAllRules[m_nItemNum].m_nTime : -1;
+	m_aTimer[1] = g_drAllRules[m_nItemNum].m_nTimerNum == 2 ? m_aTimer[0] : -1;
+}
+
+// 依据编号打印时钟信息
+void CStartDebate::PrintTimer(unsigned __n)
+{
+	CString output;
+	output.Format(_T("%2d:%02d\r\n"), m_aTimer[__n] / 60, m_aTimer[__n] - 60 * int(m_aTimer[__n] / 60));
+	auto pOperStatic{ __n ? &m_stcShowTime2 : &m_stcShowTime };
+	if (m_aTimer[__n] <= 30)
+		pOperStatic->SetTextColor(RGB(255, 0, 0));
+	pOperStatic->SetWindowText(output);
 }
 
 // 在静态框中打印时钟信息
 void CStartDebate::PrintTimer()
 {
 	const SRule & rule{ g_drAllRules[m_nItemNum] };
-	CString output;
-	output.Format(_T("%2d:%02d\r\n"), m_aTimer[0] / 60, m_aTimer[0] - 60 * int(m_aTimer[0] / 60));
-	if (m_aTimer[0] <= 30)
-		m_stcShowTime.SetTextColor(RGB(255, 0, 0));
-	m_stcShowTime.SetWindowText(output);
+	PrintTimer(0);
 	if (rule.m_nTimerNum > 1)
-	{
-		output.Format(_T("%2d:%02d"), m_aTimer[1] / 60, m_aTimer[1] - 60 * int(m_aTimer[1] / 60));
-		if (m_aTimer[1] <= 30)
-			m_stcShowTime2.SetTextColor(RGB(255, 0, 0));
-		m_stcShowTime2.SetWindowText(output);
-	}
+		PrintTimer(1);
 	// 变更一下字体的刷新机制,没有切换到下一张就没必要反复设置字体
 	static int nPage{ -1 };
 	if(nPage != m_nItemNum)
@@ -142,7 +133,7 @@ void CStartDebate::PrintTimer()
 		CRect rect;
 		SetTimerShowMode();
 		m_stcShowTime.GetClientRect(rect);
-		m_font.CreatePointFont(6*rect.Height(), CString{ "Microsoft Sans Serif" });
+		m_font.CreatePointFont(6 * rect.Height(), _T("Microsoft Sans Serif"));
 		m_stcShowTime.SetFont(&m_font);
 		m_stcShowTime2.SetFont(&m_font);
 		nPage = m_nItemNum;
@@ -172,11 +163,8 @@ void CStartDebate::ResetItem()
 // 播放文件中音频
 void CStartDebate::PlaySoundFromFile(const char* __file)
 {
-	USES_CONVERSION;
-	MCIWndPlay(MCIWndCreate(GetSafeHwnd(),
-		AfxGetInstanceHandle(),
-		WS_CHILD | MCIWNDF_NOMENU | MCIWNDF_NOTIFYMODE,
-		A2W(__file)));
+	MCIWndPlay(MCIWndCreate(GetSafeHwnd(), AfxGetInstanceHandle(),
+		WS_CHILD | MCIWNDF_NOMENU | MCIWNDF_NOTIFYMODE, CString{ __file }));
 }
 
 BOOL CStartDebate::PreTranslateMessage(MSG* pMsg)
@@ -250,6 +238,8 @@ BOOL CStartDebate::OnInitDialog()
 	// 初始化控件
 	m_stcShowTime.SetBkgndColor(RGB(0, 0, 255));
 	m_stcShowTime2.SetBkgndColor(RGB(0, 0, 255));
+	m_stcShowTime.SetTextFormat(DT_CENTER | DT_VCENTER);
+	m_stcShowTime2.SetTextFormat(DT_CENTER | DT_VCENTER);
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // EXCEPTION: OCX Property Pages should return FALSE
 }
@@ -373,7 +363,7 @@ void CStartDebate::OnSize(UINT nType, int cx, int cy)
 	// 移动按钮到指定位置
 	CRect rectBtn;
 	m_btnStart.GetWindowRect(rectBtn);
-	const int btnWidth{ rectBtn.Width() };
+	const int btnWidth{ int(0.1*cx) };
 	const int btnHeight{ rectBtn.Height() };
 	// 左上角按钮的左上角坐标
 	const int x0{ int((cx - btnWidth*8) / 2) };	// 居中显示,中间间隔0.4倍按钮长度

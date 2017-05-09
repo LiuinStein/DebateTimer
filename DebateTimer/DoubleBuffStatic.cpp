@@ -4,13 +4,15 @@
 
 CDoubleBuffStatic::CDoubleBuffStatic() :
 	m_cstrShowText(_T("")), m_colorText(RGB(255,255,255)),
-	m_colorBkgnd(RGB(0,0,0)), m_fontText(nullptr)
+	m_colorBkgnd(RGB(0,0,0)), m_fontText(nullptr),
+	m_fmtText(DT_LEFT)
 {
 }
 
 CDoubleBuffStatic::CDoubleBuffStatic(CDoubleBuffStatic& __c) :
 	m_cstrShowText(__c.m_cstrShowText), m_colorText(__c.m_colorText),
-	m_colorBkgnd(__c.m_colorBkgnd), m_fontText(__c.m_fontText)
+	m_colorBkgnd(__c.m_colorBkgnd), m_fontText(__c.m_fontText),
+	m_fmtText(__c.m_fmtText)
 {
 }
 
@@ -28,6 +30,12 @@ void CDoubleBuffStatic::SetWindowText(LPCTSTR __str)
 void CDoubleBuffStatic::GetWindowText(CString& __str) const
 {
 	__str = m_cstrShowText;
+}
+
+void CDoubleBuffStatic::SetTextFormat(UINT __agn)
+{
+	m_fmtText = __agn;
+	Invalidate();
 }
 
 void CDoubleBuffStatic::SetTextColor(COLORREF __color)
@@ -93,5 +101,5 @@ void CDoubleBuffStatic::PaintOnMemDC(CRect __rect, CDC* __mdc)
 	__mdc->SetTextColor(m_colorText);
 	if(m_fontText)
 		__mdc->SelectObject(m_fontText);
-	__mdc->DrawText(m_cstrShowText, __rect, DT_CENTER | DT_VCENTER);
+	__mdc->DrawText(m_cstrShowText, __rect, m_fmtText);
 }
