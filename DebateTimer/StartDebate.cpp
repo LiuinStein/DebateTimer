@@ -122,22 +122,9 @@ void CStartDebate::PrintTimer(unsigned __n)
 // 在静态框中打印时钟信息
 void CStartDebate::PrintTimer()
 {
-	const SRule & rule{ g_drAllRules[m_nItemNum] };
 	PrintTimer(0);
-	if (rule.m_nTimerNum > 1)
+	if (g_drAllRules[m_nItemNum].m_nTimerNum > 1)
 		PrintTimer(1);
-	// 变更一下字体的刷新机制,没有切换到下一张就没必要反复设置字体
-	static int nPage{ -1 };
-	if(nPage != m_nItemNum)
-	{
-		CRect rect;
-		SetTimerShowMode();
-		m_stcShowTime.GetClientRect(rect);
-		m_font.CreatePointFont(6 * rect.Height(), _T("Microsoft Sans Serif"));
-		m_stcShowTime.SetFont(&m_font);
-		m_stcShowTime2.SetFont(&m_font);
-		nPage = m_nItemNum;
-	}
 }
 
 // 重置本节
@@ -154,10 +141,17 @@ void CStartDebate::ResetItem()
 	m_btnShowList.SetWindowTextW(_T("显示列表"));
 	m_stcShowTime.SetTextColor(RGB(255, 255, 255));
 	m_stcShowTime2.SetTextColor(RGB(255, 255, 255));
+	SetTimerShowMode();
 	ResetTimer();
 	PrintTitle();
 	PrintTimerName();
 	PrintTimer();
+	// 刷新计时器框的字体
+	CRect rect;
+	m_stcShowTime.GetClientRect(rect);
+	m_font.CreatePointFont(6 * rect.Height(), _T("Microsoft Sans Serif"));
+	m_stcShowTime.SetFont(&m_font);
+	m_stcShowTime2.SetFont(&m_font);
 }
 
 // 播放文件中音频
